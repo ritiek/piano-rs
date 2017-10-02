@@ -19,8 +19,8 @@ fn main() {
     for y in 0..16 {
         for x in 0..52 {
             let k = x*3;
-            rustbox.print(k, y, rustbox::RB_BOLD, Color::White, Color::Black, " ██");
             rustbox.print(k, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
+            rustbox.print(k+1, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
         }
     }
 
