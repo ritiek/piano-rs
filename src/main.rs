@@ -15,6 +15,8 @@ use rustbox::Key;
 
 fn print_whitekeys(rustbox: &RustBox) {
     for y in 0..16 {
+        // last border is lonely
+        rustbox.print(156, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
         for x in 0..52 {
             let k = x*3;
             rustbox.print(k, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
