@@ -3,8 +3,8 @@ extern crate rodio;
 
 use std::default::Default;
 use std::io::BufReader;
-// use std::thread;
-// use std::time::Duration;
+use std::thread;
+use std::time::Duration;
 
 use rustbox::{Color, RustBox};
 use rustbox::Key;
@@ -28,7 +28,7 @@ fn print_whitekeys(rustbox: &RustBox) {
 
 fn print_blackkeys(rustbox: &RustBox) {
     for y in 0..9 {
-        // 1st black key is lonely
+        // first black key is lonely
         rustbox.print(3, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
 
         for x in 0..7 {
@@ -36,6 +36,7 @@ fn print_blackkeys(rustbox: &RustBox) {
             let g1k2 = g1k1 + 3;
             rustbox.print(g1k1, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
             rustbox.print(g1k2, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
+
             let g2k1 = g1k2 + 6;
             let g2k2 = g2k1 + 3;
             let g2k3 = g2k2 + 3;
@@ -53,6 +54,16 @@ fn play_note(note: &str, endpoint: &rodio::Endpoint) -> Result<rodio::Sink,
     let file_path = format!("assets/{}.ogg", note);
     let file = std::fs::File::open(file_path).unwrap();
     rodio::play_once(endpoint, BufReader::new(file))
+}
+
+
+fn make_mark(x: usize, y: usize, rustbox: &RustBox) {
+    rustbox.print(x, y, rustbox::RB_BOLD, Color::Black, Color::White, "▒▒");
+    thread::spawn(move || {
+        let delay = Duration::from_millis(2000);
+        thread::sleep(delay);
+        rustbox.print(x, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
+    });
 }
 
 
@@ -74,9 +85,11 @@ fn main() {
                 match key {
                     Key::Char('q') => {
                         play_note("a0", &endpoint).unwrap().detach();
+                        make_mark(1, 15, &rustbox);
                     }
                     Key::Char('w') => {
                         play_note("b0", &endpoint).unwrap().detach();
+                        make_mark(1, 15, &rustbox);
                     }
                     Key::Esc => { break; }
                     _ => { }
