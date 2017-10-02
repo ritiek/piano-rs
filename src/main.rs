@@ -25,7 +25,7 @@ fn print_whitekeys(rustbox: &RustBox) {
 
 fn print_blackkeys(rustbox: &RustBox) {
     for y in 0..9 {
-        //1st black key is lonely
+        // 1st black key is lonely
         rustbox.print(3, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
 
         for x in 0..7 {
@@ -57,8 +57,10 @@ fn main() {
         rustbox.present();
         match rustbox.poll_event(false) {
             Ok(rustbox::Event::KeyEvent(key)) => {
+                // println!("{:?}", key);
                 match key {
                     Key::Char('q') => { break; }
+                    Key::Esc => { break; }
                     _ => { }
                 }
             },
