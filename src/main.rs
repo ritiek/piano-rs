@@ -61,12 +61,12 @@ fn main() {
                 // println!("{:?}", key);
                 match key {
                     Key::Char('q') => {
-                        let file = std::fs::File::open("../piano-rs/assets/a0.ogg").unwrap();
+                        let file = std::fs::File::open("assets/a0.ogg").unwrap();
                         let mut beep = rodio::play_once(&endpoint, BufReader::new(file)).unwrap()
                                             .detach();
                     }
                     Key::Char('w') => {
-                        let file = std::fs::File::open("../piano-rs/assets/b0.ogg").unwrap();
+                        let file = std::fs::File::open("assets/b0.ogg").unwrap();
                         let mut beep = rodio::play_once(&endpoint, BufReader::new(file)).unwrap()
                                             .detach();
                     }
