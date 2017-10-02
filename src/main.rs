@@ -3,8 +3,8 @@ extern crate rodio;
 
 use std::default::Default;
 use std::io::BufReader;
-use std::thread;
-use std::time::Duration;
+// use std::thread;
+// use std::time::Duration;
 
 use rustbox::{Color, RustBox};
 use rustbox::Key;
@@ -24,6 +24,7 @@ fn print_whitekeys(rustbox: &RustBox) {
         }
     }
 }
+
 
 fn print_blackkeys(rustbox: &RustBox) {
     for y in 0..9 {
@@ -46,6 +47,15 @@ fn print_blackkeys(rustbox: &RustBox) {
     }
 }
 
+
+fn play_note(note: &str, endpoint: &rodio::Endpoint) -> Result<rodio::Sink,
+                                                        rodio::decoder::DecoderError> {
+    let file_path = format!("assets/{}.ogg", note);
+    let file = std::fs::File::open(file_path).unwrap();
+    rodio::play_once(endpoint, BufReader::new(file))
+}
+
+
 fn main() {
     let rustbox = match RustBox::init(Default::default()) {
         Result::Ok(v) => v,
@@ -63,14 +73,10 @@ fn main() {
                 // println!("{:?}", key);
                 match key {
                     Key::Char('q') => {
-                        let file = std::fs::File::open("assets/a0.ogg").unwrap();
-                        let mut beep = rodio::play_once(&endpoint, BufReader::new(file)).unwrap()
-                                            .detach();
+                        play_note("a0", &endpoint).unwrap().detach();
                     }
                     Key::Char('w') => {
-                        let file = std::fs::File::open("assets/b0.ogg").unwrap();
-                        let mut beep = rodio::play_once(&endpoint, BufReader::new(file)).unwrap()
-                                            .detach();
+                        play_note("b0", &endpoint).unwrap().detach();
                     }
                     Key::Esc => { break; }
                     _ => { }
