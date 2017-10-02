@@ -49,6 +49,7 @@ fn main() {
         Result::Ok(v) => v,
         Result::Err(e) => panic!("{}", e),
     };
+    let endpoint = rodio::get_default_endpoint().unwrap();
 
     print_whitekeys(&rustbox);
     print_blackkeys(&rustbox);
@@ -59,7 +60,16 @@ fn main() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 // println!("{:?}", key);
                 match key {
-                    Key::Char('q') => { break; }
+                    Key::Char('q') => {
+                        let file = std::fs::File::open("../piano-rs/assets/a0.ogg").unwrap();
+                        let mut beep = rodio::play_once(&endpoint, BufReader::new(file)).unwrap();
+                        thread::sleep(Duration::from_millis(1500));
+                    }
+                    Key::Char('w') => {
+                        let file = std::fs::File::open("../piano-rs/assets/b0.ogg").unwrap();
+                        let mut beep = rodio::play_once(&endpoint, BufReader::new(file)).unwrap();
+                        thread::sleep(Duration::from_millis(1500));
+                    }
                     Key::Esc => { break; }
                     _ => { }
                 }
