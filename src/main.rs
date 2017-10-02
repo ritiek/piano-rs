@@ -1,6 +1,10 @@
 extern crate rustbox;
+extern crate rodio;
 
 use std::default::Default;
+use std::io::BufReader;
+use std::thread;
+use std::time::Duration;
 
 use rustbox::{Color, RustBox};
 use rustbox::Key;
@@ -9,13 +13,7 @@ use rustbox::Key;
 █▒
 */
 
-fn main() {
-    let rustbox = match RustBox::init(Default::default()) {
-        Result::Ok(v) => v,
-        Result::Err(e) => panic!("{}", e),
-    };
-
-    /* white keys */
+fn print_whitekeys(rustbox: &RustBox) {
     for y in 0..16 {
         for x in 0..52 {
             let k = x*3;
@@ -23,8 +21,9 @@ fn main() {
             rustbox.print(k+1, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
         }
     }
+}
 
-    /*black keys */
+fn print_blackkeys(rustbox: &RustBox) {
     for y in 0..9 {
         //1st black key is lonely
         rustbox.print(3, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
@@ -43,6 +42,16 @@ fn main() {
         }
 
     }
+}
+
+fn main() {
+    let rustbox = match RustBox::init(Default::default()) {
+        Result::Ok(v) => v,
+        Result::Err(e) => panic!("{}", e),
+    };
+
+    print_whitekeys(&rustbox);
+    print_blackkeys(&rustbox);
 
     loop {
         rustbox.present();

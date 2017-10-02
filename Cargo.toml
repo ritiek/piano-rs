@@ -5,3 +5,4 @@ authors = ["Ritiek <ritiekmalhotra123@gmail.com>"]
 
 [dependencies]
 rustbox = "*"
+rodio = "*"
