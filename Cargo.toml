@@ -6,3 +6,4 @@ authors = ["Ritiek <ritiekmalhotra123@gmail.com>"]
 [dependencies]
 rustbox = "*"
 rodio = "*"
+crossbeam = "0.3.0"

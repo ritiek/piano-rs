@@ -1,10 +1,11 @@
 extern crate rustbox;
 extern crate rodio;
+extern crate crossbeam;
 
 use std::default::Default;
 use std::io::BufReader;
-// use std::thread;
-// use std::time::Duration;
+use std::thread;
+use std::time::Duration;
 
 use rustbox::{Color, RustBox};
 use rustbox::Key;
@@ -58,12 +59,16 @@ fn play_note(note: &str, endpoint: &rodio::Endpoint) -> Result<rodio::Sink,
 
 
 fn make_mark(x: usize, y: usize, rustbox: &RustBox) {
-    rustbox.print(x, y, rustbox::RB_BOLD, Color::Black, Color::White, "▒▒");
-    /*thread::spawn(move || {
-        let delay = Duration::from_millis(2000);
-        thread::sleep(delay);
-        rustbox.print(x, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
-    });*/
+    crossbeam::scope(|scope| {
+        scope.defer(|| {
+            rustbox.print(x, y, rustbox::RB_BOLD, Color::Black, Color::White, "▒▒");
+            rustbox.present();
+
+            let delay = Duration::from_millis(2000);
+            thread::sleep(delay);
+            rustbox.print(x, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
+        });
+    });
 }
 
 
