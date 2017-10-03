@@ -3,8 +3,8 @@ extern crate rodio;
 
 use std::default::Default;
 use std::io::BufReader;
-use std::thread;
-use std::time::Duration;
+// use std::thread;
+// use std::time::Duration;
 
 use rustbox::{Color, RustBox};
 use rustbox::Key;
@@ -59,11 +59,11 @@ fn play_note(note: &str, endpoint: &rodio::Endpoint) -> Result<rodio::Sink,
 
 fn make_mark(x: usize, y: usize, rustbox: &RustBox) {
     rustbox.print(x, y, rustbox::RB_BOLD, Color::Black, Color::White, "▒▒");
-    thread::spawn(move || {
+    /*thread::spawn(move || {
         let delay = Duration::from_millis(2000);
         thread::sleep(delay);
         rustbox.print(x, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
-    });
+    });*/
 }
 
 
@@ -89,7 +89,7 @@ fn main() {
                     }
                     Key::Char('w') => {
                         play_note("b0", &endpoint).unwrap().detach();
-                        make_mark(1, 15, &rustbox);
+                        make_mark(4, 15, &rustbox);
                     }
                     Key::Esc => { break; }
                     _ => { }
