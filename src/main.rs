@@ -98,6 +98,15 @@ fn main() {
                         play_note("b0", &endpoint).unwrap().detach();
                         //make_mark(4, 15, &rustbox);
                     }
+                    Key::Char('z') => {
+                        play_note("a-1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('s') => {
+                        play_note("as-1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('x') => {
+                        play_note("b-1", &endpoint).unwrap().detach();
+                    }
                     Key::Char('c') => {
                         play_note("c0", &endpoint).unwrap().detach();
                     }
@@ -109,6 +118,21 @@ fn main() {
                     }
                     Key::Char('g') => {
                         play_note("ds0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('b') => {
+                        play_note("e0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('n') => {
+                        play_note("f0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('j') => {
+                        play_note("fs0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('m') => {
+                        play_note("g0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('k') => {
+                        play_note("gs0", &endpoint).unwrap().detach();
                     }
                     Key::Esc => { break; }
                     _ => { }
