@@ -4,8 +4,8 @@ extern crate crossbeam;
 
 use std::default::Default;
 use std::io::BufReader;
-use std::thread;
-use std::time::Duration;
+//use std::thread;
+//use std::time::Duration;
 
 use rustbox::{Color, RustBox};
 use rustbox::Key;
@@ -58,6 +58,7 @@ fn play_note(note: &str, endpoint: &rodio::Endpoint) -> Result<rodio::Sink,
 }
 
 
+/*
 fn make_mark(x: usize, y: usize, rustbox: &RustBox) {
     crossbeam::scope(|scope| {
         scope.defer(|| {
@@ -70,6 +71,7 @@ fn make_mark(x: usize, y: usize, rustbox: &RustBox) {
         });
     });
 }
+*/
 
 
 fn main() {
@@ -90,11 +92,11 @@ fn main() {
                 match key {
                     Key::Char('q') => {
                         play_note("a0", &endpoint).unwrap().detach();
-                        make_mark(1, 15, &rustbox);
+                        //make_mark(1, 15, &rustbox);
                     }
                     Key::Char('w') => {
                         play_note("b0", &endpoint).unwrap().detach();
-                        make_mark(4, 15, &rustbox);
+                        //make_mark(4, 15, &rustbox);
                     }
                     Key::Esc => { break; }
                     _ => { }
