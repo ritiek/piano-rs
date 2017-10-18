@@ -98,6 +98,18 @@ fn main() {
                         play_note("b0", &endpoint).unwrap().detach();
                         //make_mark(4, 15, &rustbox);
                     }
+                    Key::Char('c') => {
+                        play_note("c0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('f') => {
+                        play_note("cs0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('v') => {
+                        play_note("d0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('g') => {
+                        play_note("ds0", &endpoint).unwrap().detach();
+                    }
                     Key::Esc => { break; }
                     _ => { }
                 }
