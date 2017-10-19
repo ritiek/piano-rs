@@ -90,14 +90,6 @@ fn main() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 // println!("{:?}", key);
                 match key {
-                    Key::Char('q') => {
-                        play_note("a0", &endpoint).unwrap().detach();
-                        //make_mark(1, 15, &rustbox);
-                    }
-                    Key::Char('w') => {
-                        play_note("b0", &endpoint).unwrap().detach();
-                        //make_mark(4, 15, &rustbox);
-                    }
                     Key::Char('z') => {
                         play_note("a-1", &endpoint).unwrap().detach();
                     }
@@ -131,8 +123,23 @@ fn main() {
                     Key::Char('m') => {
                         play_note("g0", &endpoint).unwrap().detach();
                     }
-                    Key::Char('k') => {
+                    Key::Char('k') | Key::Char('1') => {
                         play_note("gs0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char(',') | Key::Char('q') => {
+                        play_note("a0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('l') | Key::Char('2') => {
+                        play_note("as0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('.') | Key::Char('w') => {
+                        play_note("b0", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('/') | Key::Char('e') => {
+                        play_note("c1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('\'') | Key::Char('4') => {
+                        play_note("cs1", &endpoint).unwrap().detach();
                     }
                     Key::Esc => { break; }
                     _ => { }
