@@ -162,6 +162,24 @@ fn main() {
                     Key::Char('8') => {
                         play_note("gs1", &endpoint).unwrap().detach();
                     }
+                    Key::Char('i') => {
+                        play_note("a1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('9') => {
+                        play_note("as1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('o') => {
+                        play_note("b1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('p') => {
+                        play_note("c2", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('[') => {
+                        play_note("d2", &endpoint).unwrap().detach();
+                    }
+                    Key::Char(']') => {
+                        play_note("e2", &endpoint).unwrap().detach();
+                    }
                     Key::Esc => { break; }
                     _ => { }
                 }
