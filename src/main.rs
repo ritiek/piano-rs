@@ -141,6 +141,27 @@ fn main() {
                     Key::Char('\'') | Key::Char('4') => {
                         play_note("cs1", &endpoint).unwrap().detach();
                     }
+                    Key::Char('r') => {
+                        play_note("d1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('5') => {
+                        play_note("ds1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('t') => {
+                        play_note("e1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('y') => {
+                        play_note("f1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('7') => {
+                        play_note("fs1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('u') => {
+                        play_note("g1", &endpoint).unwrap().detach();
+                    }
+                    Key::Char('8') => {
+                        play_note("gs1", &endpoint).unwrap().detach();
+                    }
                     Key::Esc => { break; }
                     _ => { }
                 }
