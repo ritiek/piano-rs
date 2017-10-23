@@ -103,9 +103,9 @@ fn main() {
                     Key::Char('j') => { play_note("fs", sequence,   &endpoint).unwrap().detach(); }
                     Key::Char('m') => { play_note("g" , sequence,   &endpoint).unwrap().detach(); }
                     Key::Char('k')  | Key::Char('1') => { play_note("gs", sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char(',')  | Key::Char('q') => { play_note("a" , sequence, &endpoint).unwrap().detach(); }
-                    Key::Char('l')  | Key::Char('2') => { play_note("as", sequence, &endpoint).unwrap().detach(); }
-                    Key::Char('.')  | Key::Char('w') => { play_note("b" , sequence, &endpoint).unwrap().detach(); }
+                    Key::Char(',')  | Key::Char('q') => { play_note("a" , sequence,   &endpoint).unwrap().detach(); }
+                    Key::Char('l')  | Key::Char('2') => { play_note("as", sequence,   &endpoint).unwrap().detach(); }
+                    Key::Char('.')  | Key::Char('w') => { play_note("b" , sequence,   &endpoint).unwrap().detach(); }
                     Key::Char('/')  | Key::Char('e') => { play_note("c" , sequence+1, &endpoint).unwrap().detach(); }
                     Key::Char('\'') | Key::Char('4') => { play_note("cs", sequence+1, &endpoint).unwrap().detach(); }
                     Key::Char('r') => { play_note("d" , sequence+1, &endpoint).unwrap().detach(); }
@@ -119,8 +119,9 @@ fn main() {
                     Key::Char('9') => { play_note("as", sequence+1, &endpoint).unwrap().detach(); }
                     Key::Char('o') => { play_note("b" , sequence+1, &endpoint).unwrap().detach(); }
                     Key::Char('p') => { play_note("c" , sequence+2, &endpoint).unwrap().detach(); }
-                    Key::Char('[') => { play_note("d" , sequence+2, &endpoint).unwrap().detach(); }
-                    Key::Char(']') => { play_note("e" , sequence+2, &endpoint).unwrap().detach(); }
+                    Key::Char('[') => if sequence < 5 { play_note("d" , sequence+2, &endpoint).unwrap().detach(); }
+                    Key::Char(']') => if sequence < 5 { play_note("e" , sequence+2, &endpoint).unwrap().detach(); }
+                    Key::Char('a') => if sequence > 0 { play_note("gs", sequence-1, &endpoint).unwrap().detach(); }
                     Key::Right => if sequence < 5 { sequence += 1 }
                     Key::Left  => if sequence > 0 { sequence -= 1 }
                     Key::Esc   => { break; }
