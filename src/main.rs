@@ -50,28 +50,20 @@ fn print_blackkeys(rustbox: &RustBox) {
 }
 
 
-fn play_note(note: &str, sequence: i16, endpoint: &rodio::Endpoint) -> Result<rodio::Sink,
-                                                        rodio::decoder::DecoderError> {
+fn play_note(note: &str, mark: (usize, usize, usize), sequence: i16, endpoint: &rodio::Endpoint, rustbox: &RustBox) {
     let file_path = format!("assets/{0}{1}.ogg", note, sequence);
     let file = std::fs::File::open(file_path).unwrap();
     rodio::play_once(endpoint, BufReader::new(file))
+        .unwrap()
+        .detach();
+    print_whitekeys(rustbox);
+    print_blackkeys(rustbox);
+    let (x, y, z) = mark;
+
+    for n in 0..z {
+        rustbox.print(x+n, y, rustbox::RB_BOLD, Color::Blue, Color::White, "▒");
+    }
 }
-
-
-/*
-fn make_mark(x: usize, y: usize, rustbox: &RustBox) {
-    crossbeam::scope(|scope| {
-        scope.defer(|| {
-            rustbox.print(x, y, rustbox::RB_BOLD, Color::Black, Color::White, "▒▒");
-            rustbox.present();
-
-            let delay = Duration::from_millis(2000);
-            thread::sleep(delay);
-            rustbox.print(x, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
-        });
-    });
-}
-*/
 
 
 fn main() {
@@ -91,37 +83,37 @@ fn main() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 // println!("{:?}", key);
                 match key {
-                    Key::Char('z') => { play_note("a" , sequence-1, &endpoint).unwrap().detach(); }
-                    Key::Char('s') => { play_note("as", sequence-1, &endpoint).unwrap().detach(); }
-                    Key::Char('x') => { play_note("b" , sequence-1, &endpoint).unwrap().detach(); }
-                    Key::Char('c') => { play_note("c" , sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('f') => { play_note("cs", sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('v') => { play_note("d" , sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('g') => { play_note("ds", sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('b') => { play_note("e" , sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('n') => { play_note("f" , sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('j') => { play_note("fs", sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('m') => { play_note("g" , sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('k')  | Key::Char('1') => { play_note("gs", sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char(',')  | Key::Char('q') => { play_note("a" , sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('l')  | Key::Char('2') => { play_note("as", sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('.')  | Key::Char('w') => { play_note("b" , sequence,   &endpoint).unwrap().detach(); }
-                    Key::Char('/')  | Key::Char('e') => { play_note("c" , sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('\'') | Key::Char('4') => { play_note("cs", sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('r') => { play_note("d" , sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('5') => { play_note("ds", sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('t') => { play_note("e" , sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('y') => { play_note("f" , sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('7') => { play_note("fs", sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('u') => { play_note("g" , sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('8') => { play_note("gs", sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('i') => { play_note("a" , sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('9') => { play_note("as", sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('o') => { play_note("b" , sequence+1, &endpoint).unwrap().detach(); }
-                    Key::Char('p') => { play_note("c" , sequence+2, &endpoint).unwrap().detach(); }
-                    Key::Char('[') => if sequence < 5 { play_note("d" , sequence+2, &endpoint).unwrap().detach(); }
-                    Key::Char(']') => if sequence < 5 { play_note("e" , sequence+2, &endpoint).unwrap().detach(); }
-                    Key::Char('a') => if sequence > 0 { play_note("gs", sequence-1, &endpoint).unwrap().detach(); }
+                    Key::Char('z') => { play_note("a" , (1, 15, 2), sequence-1, &endpoint, &rustbox); }
+                    Key::Char('s') => { play_note("as", (3, 8, 1) , sequence-1, &endpoint, &rustbox); }
+                    /*Key::Char('x') => { play_note("b" , sequence-1, &endpoint); }
+                    Key::Char('c') => { play_note("c" , sequence,   &endpoint); }
+                    Key::Char('f') => { play_note("cs", sequence,   &endpoint); }
+                    Key::Char('v') => { play_note("d" , sequence,   &endpoint); }
+                    Key::Char('g') => { play_note("ds", sequence,   &endpoint); }
+                    Key::Char('b') => { play_note("e" , sequence,   &endpoint); }
+                    Key::Char('n') => { play_note("f" , sequence,   &endpoint); }
+                    Key::Char('j') => { play_note("fs", sequence,   &endpoint); }
+                    Key::Char('m') => { play_note("g" , sequence,   &endpoint); }
+                    Key::Char('k')  | Key::Char('1') => { play_note("gs", sequence,   &endpoint); }
+                    Key::Char(',')  | Key::Char('q') => { play_note("a" , sequence,   &endpoint); }
+                    Key::Char('l')  | Key::Char('2') => { play_note("as", sequence,   &endpoint); }
+                    Key::Char('.')  | Key::Char('w') => { play_note("b" , sequence,   &endpoint); }
+                    Key::Char('/')  | Key::Char('e') => { play_note("c" , sequence+1, &endpoint); }
+                    Key::Char('\'') | Key::Char('4') => { play_note("cs", sequence+1, &endpoint); }
+                    Key::Char('r') => { play_note("d" , sequence+1, &endpoint); }
+                    Key::Char('5') => { play_note("ds", sequence+1, &endpoint); }
+                    Key::Char('t') => { play_note("e" , sequence+1, &endpoint); }
+                    Key::Char('y') => { play_note("f" , sequence+1, &endpoint); }
+                    Key::Char('7') => { play_note("fs", sequence+1, &endpoint); }
+                    Key::Char('u') => { play_note("g" , sequence+1, &endpoint); }
+                    Key::Char('8') => { play_note("gs", sequence+1, &endpoint); }
+                    Key::Char('i') => { play_note("a" , sequence+1, &endpoint); }
+                    Key::Char('9') => { play_note("as", sequence+1, &endpoint); }
+                    Key::Char('o') => { play_note("b" , sequence+1, &endpoint); }
+                    Key::Char('p') => { play_note("c" , sequence+2, &endpoint); }
+                    Key::Char('[') => if sequence < 5 { play_note("d" , sequence+2, &endpoint); }
+                    Key::Char(']') => if sequence < 5 { play_note("e" , sequence+2, &endpoint); }
+                    Key::Char('a') => if sequence > 0 { play_note("gs", sequence-1, &endpoint); }*/
                     Key::Right => if sequence < 5 { sequence += 1 }
                     Key::Left  => if sequence > 0 { sequence -= 1 }
                     Key::Esc   => { break; }
