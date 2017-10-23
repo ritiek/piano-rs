@@ -121,7 +121,7 @@ fn main() {
                     Key::Char('p') => { play_note("c" , sequence+2, &endpoint).unwrap().detach(); }
                     Key::Char('[') => { play_note("d" , sequence+2, &endpoint).unwrap().detach(); }
                     Key::Char(']') => { play_note("e" , sequence+2, &endpoint).unwrap().detach(); }
-                    Key::Right => if sequence < 7 { sequence += 1 }
+                    Key::Right => if sequence < 5 { sequence += 1 }
                     Key::Left  => if sequence > 0 { sequence -= 1 }
                     Key::Esc   => { break; }
                     _ => { }
