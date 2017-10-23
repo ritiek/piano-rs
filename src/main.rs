@@ -50,7 +50,7 @@ fn print_blackkeys(rustbox: &RustBox) {
 }
 
 
-fn play_note(note: &str, mark: (usize, usize, usize), sequence: i16, endpoint: &rodio::Endpoint, rustbox: &RustBox) {
+fn play_note(note: &str, mark: (usize, bool), sequence: i16, endpoint: &rodio::Endpoint, rustbox: &RustBox) {
     let file_path = format!("assets/{0}{1}.ogg", note, sequence);
     let file = std::fs::File::open(file_path).unwrap();
     rodio::play_once(endpoint, BufReader::new(file))
@@ -58,10 +58,12 @@ fn play_note(note: &str, mark: (usize, usize, usize), sequence: i16, endpoint: &
         .detach();
     print_whitekeys(rustbox);
     print_blackkeys(rustbox);
-    let (x, y, z) = mark;
+    let (x, white) = mark;
 
-    for n in 0..z {
-        rustbox.print(x+n, y, rustbox::RB_BOLD, Color::Blue, Color::White, "▒");
+    if white {
+        rustbox.print(x, 15, rustbox::RB_BOLD, Color::Red, Color::White, "▒▒");
+    } else {
+        rustbox.print(x, 8, rustbox::RB_BOLD, Color::Red, Color::White, "▒");
     }
 }
 
@@ -83,8 +85,8 @@ fn main() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 // println!("{:?}", key);
                 match key {
-                    Key::Char('z') => { play_note("a" , (1, 15, 2), sequence-1, &endpoint, &rustbox); }
-                    Key::Char('s') => { play_note("as", (3, 8, 1) , sequence-1, &endpoint, &rustbox); }
+                    Key::Char('z') => { play_note("a" , (1, true), sequence-1, &endpoint, &rustbox); }
+                    Key::Char('s') => { play_note("as", (3, false), sequence-1, &endpoint, &rustbox); }
                     /*Key::Char('x') => { play_note("b" , sequence-1, &endpoint); }
                     Key::Char('c') => { play_note("c" , sequence,   &endpoint); }
                     Key::Char('f') => { play_note("cs", sequence,   &endpoint); }
