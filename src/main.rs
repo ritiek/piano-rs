@@ -1,6 +1,5 @@
 extern crate rustbox;
 extern crate rodio;
-extern crate crossbeam;
 
 use std::default::Default;
 use std::io::BufReader;
