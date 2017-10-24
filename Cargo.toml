@@ -10,8 +10,8 @@ categories = ["multimedia::audio", "command-line-utilities"]
 license = "MIT"
 
 [dependencies]
-rustbox = "*"
-rodio = "*"
+rustbox = "0.9"
+rodio = "0.5"
 
 [[bin]]
 name = "piano-rs"
