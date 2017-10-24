@@ -9,9 +9,9 @@ Play piano in the terminal using PC keyboard.
 ## Compiling
 
 ```
-git clone https://github.com/ritiek/piano-rs
-cd piano-rs
-cargo build --release
+$ git clone https://github.com/ritiek/piano-rs
+$ cd piano-rs
+$ cargo build --release
 ```
 
 ## Usage
