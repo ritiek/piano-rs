@@ -6,24 +6,18 @@ Play piano in the terminal using PC keyboard.
 
 <img src="http://i.imgur.com/33s2XDW.png" width="900">
 
-## Installation
+## Compiling
 
-- Installing via crates.io:
-```
-cargo install piano-rs
-```
-
-- Installing latest version from GitHub:
 ```
 git clone https://github.com/ritiek/piano-rs
 cd piano-rs
-cargo install
+cargo build --release
 ```
 
 ## Usage
 
 ```
-$ piano-rs
+$ cargo run --release
 ```
 
 - Press keys on your PC keyboard to play the notes.
