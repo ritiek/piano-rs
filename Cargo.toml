@@ -10,6 +10,7 @@ categories = ["multimedia::audio", "command-line-utilities"]
 license = "MIT"
 
 [dependencies]
+clap = "2.27"
 rustbox = "0.9"
 rodio = "0.5"
 
