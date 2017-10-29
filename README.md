@@ -13,7 +13,6 @@ $ git clone https://github.com/ritiek/piano-rs
 $ cd piano-rs
 $ cargo build --release
 ```
-
 ## Usage
 
 Once it compiles, run the binary in `./target/release/piano-rs`:
@@ -39,6 +38,12 @@ OPTIONS:
 - Press keys on your PC keyboard to play the notes.
 - Adjust note frequency while playing using <kbd>←</kbd> and <kbd>→</kbd>.
 - Adjust note duration while playing using <kbd>↑</kbd> and <kbd>↓</kbd>.
+
+## Resources
+
+- piano-rs uses the same notes and key bindings as [multiplayerpiano.com](http://multiplayerpiano.com).
+
+- You can use this [paste](https://pastebin.com/CX1ew0uB) to learn to play various popular songs.
 
 ## License
 
