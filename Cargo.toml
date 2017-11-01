@@ -11,8 +11,8 @@ license = "MIT"
 
 [dependencies]
 clap = "2.27"
-rustbox = "0.9"
 rodio = "0.5"
+rustbox = { git = "https://github.com/dsprenkels/rustbox" }
 
 [[bin]]
 name = "piano-rs"
