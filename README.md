@@ -30,9 +30,10 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -c, --color <COLOR>          Color of block to generate when a note is played (Default: "red")
-    -d, --duration <DURATION>    Duration to play each note for, where 0 means till the end of note (Default: 0)
-    -s, --sequence <SEQUENCE>    Frequency sequence from 0 to 5 to begin with (Default: 2)
+    -c, --color <COLOR>               Color of block to generate when a note is played (Default: "red")
+    -m, --mark-duration <DURATION>    Duration to show piano mark for, in ms (Default: 500)
+    -n, --note-duration <DURATION>    Duration to play each note for, where 0 means till the end of note (Default: 0)
+    -s, --sequence <SEQUENCE>         Frequency sequence from 0 to 5 to begin with (Default: 2)
 ```
 
 - Press keys on your PC keyboard to play the notes.
