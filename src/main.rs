@@ -194,6 +194,7 @@ fn main() {
 
         .get_matches();
 
+    // A workaround to stop cracking noise after note ends (#4)
     let blank_point = rodio::get_default_endpoint().unwrap();
     let blank_sink = rodio::Sink::new(&blank_point);
     let blank_source = rodio::source::SineWave::new(0);
