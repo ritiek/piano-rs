@@ -194,6 +194,11 @@ fn main() {
 
         .get_matches();
 
+    let blank_point = rodio::get_default_endpoint().unwrap();
+    let blank_sink = rodio::Sink::new(&blank_point);
+    let blank_source = rodio::source::SineWave::new(0);
+    blank_sink.append(blank_source);
+
     let rb = match RustBox::init(Default::default()) {
         Result::Ok(v) => Arc::new(Mutex::new(v)),
         Result::Err(e) => panic!("{}", e),
