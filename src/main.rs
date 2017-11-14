@@ -352,6 +352,266 @@ fn main() {
                             draw(seq - 1, (0, c, false), mdur, rb);
                         }
                     }
+                    Key::Char('Z') => {
+                        player.play("a", seq, ndur);
+                        draw(seq, (1, c, true), mdur, rb);
+                    }
+                    Key::Char('S') => {
+                        player.play("as", seq, ndur);
+                        draw(seq, (3, c, false), mdur, rb);
+                    }
+                    Key::Char('X') => {
+                        player.play("b", seq, ndur);
+                        draw(seq, (4, c, true), mdur, rb);
+                    }
+                    Key::Char('C') => {
+                        player.play("c", seq + 1, ndur);
+                        draw(seq + 1, (7 - 21, c, true), mdur, rb);
+                    }
+                    Key::Char('F') => {
+                        player.play("cs", seq + 1, ndur);
+                        draw(seq + 1, (9 - 21, c, false), mdur, rb);
+                    }
+                    Key::Char('V') => {
+                        player.play("d", seq + 1, ndur);
+                        draw(seq + 1, (10 - 21, c, true), mdur, rb);
+                    }
+                    Key::Char('G') => {
+                        player.play("ds", seq + 1, ndur);
+                        draw(seq + 1, (12 - 21, c, false), mdur, rb);
+                    }
+                    Key::Char('B') => {
+                        player.play("e", seq + 1, ndur);
+                        draw(seq + 1, (13 - 21, c, true), mdur, rb);
+                    }
+                    Key::Char('N') => {
+                        player.play("f", seq + 1, ndur);
+                        draw(seq + 1, (16 - 21, c, true), mdur, rb);
+                    }
+                    Key::Char('J') => {
+                        player.play("fs", seq + 1, ndur);
+                        draw(seq + 1, (18 - 21, c, false), mdur, rb);
+                    }
+                    Key::Char('M') => {
+                        player.play("g", seq + 1, ndur);
+                        draw(seq + 1, (19 - 21, c, true), mdur, rb);
+                    }
+                    Key::Char('K') | Key::Char('!') => {
+                        player.play("gs", seq + 1, ndur);
+                        draw(seq + 1, (21 - 21, c, false), mdur, rb);
+                    }
+                    Key::Char('<') | Key::Char('Q') => {
+                        player.play("a", seq + 1, ndur);
+                        draw(seq + 1, (22 - 21, c, true), mdur, rb);
+                    }
+                    Key::Char('L') | Key::Char('@') => {
+                        player.play("as", seq + 1, ndur);
+                        draw(seq + 1, (24 - 21, c, false), mdur, rb);
+                    }
+                    Key::Char('>') | Key::Char('W') => {
+                        player.play("b", seq + 1, ndur);
+                        draw(seq + 1, (25 - 21, c, true), mdur, rb);
+                    }
+                    Key::Char('?') | Key::Char('E') => {
+                        player.play("c", seq + 2, ndur);
+                        draw(seq + 2, (28 - 42, c, true), mdur, rb);
+                    }
+                    Key::Char('|') | Key::Char('$') => {
+                        player.play("cs", seq + 2, ndur);
+                        draw(seq + 2, (30 - 42, c, false), mdur, rb);
+                    }
+                    Key::Char('R') => {
+                        player.play("d", seq + 2, ndur);
+                        draw(seq + 2, (31 - 42, c, true), mdur, rb);
+                    }
+                    Key::Char('%') => {
+                        player.play("ds", seq + 2, ndur);
+                        draw(seq + 2, (33 - 42, c, false), mdur, rb);
+                    }
+                    Key::Char('T') => {
+                        player.play("e", seq + 2, ndur);
+                        draw(seq + 2, (34 - 42, c, true), mdur, rb);
+                    }
+                    Key::Char('Y') => {
+                        player.play("f", seq + 2, ndur);
+                        draw(seq + 2, (37 - 42, c, true), mdur, rb);
+                    }
+                    Key::Char('&') => {
+                        player.play("fs", seq + 2, ndur);
+                        draw(seq + 2, (39 - 42, c, false), mdur, rb);
+                    }
+                    Key::Char('U') => {
+                        player.play("g", seq + 2, ndur);
+                        draw(seq + 2, (40 - 42, c, true), mdur, rb);
+                    }
+                    Key::Char('*') => {
+                        player.play("gs", seq + 2, ndur);
+                        draw(seq + 2, (42 - 42, c, false), mdur, rb);
+                    }
+                    Key::Char('I') => {
+                        player.play("a", seq + 2, ndur);
+                        draw(seq + 2, (43 - 42, c, true), mdur, rb);
+                    }
+                    Key::Char('(') => {
+                        player.play("as", seq + 2, ndur);
+                        draw(seq + 2, (45 - 42, c, false), mdur, rb);
+                    }
+                    Key::Char('O') => {
+                        player.play("b", seq + 2, ndur);
+                        draw(seq + 2, (46 - 42, c, true), mdur, rb);
+                    }
+                    Key::Char('P') => {
+                        player.play("c", seq + 3, ndur);
+                        draw(seq + 3, (49 - 63, c, true), mdur, rb);
+                    }
+                    Key::Char('{') => {
+                        if seq < 5 {
+                            player.play("d", seq + 3, ndur);
+                            draw(seq + 3, (52 - 63, c, true), mdur, rb);
+                        }
+                    }
+                    Key::Char('}') => {
+                        if seq < 5 {
+                            player.play("e", seq + 3, ndur);
+                            draw(seq + 3, (55 - 63, c, true), mdur, rb);
+                        }
+                    }
+                    Key::Ctrl('A') => {
+                        if seq > 0 {
+                            player.play("gs", seq, ndur);
+                            draw(seq, (0, c, false), mdur, rb);
+                        }
+                    }
+                    Key::Ctrl('z') => {
+                        player.play("a", seq - 2, ndur);
+                        draw(seq - 2, (1, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('s') => {
+                        player.play("as", seq - 2, ndur);
+                        draw(seq - 2, (3, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('x') => {
+                        player.play("b", seq - 2, ndur);
+                        draw(seq - 2, (4, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('c') => {
+                        player.play("c", seq - 1, ndur);
+                        draw(seq - 1, (7 - 21, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('f') => {
+                        player.play("cs", seq - 1, ndur);
+                        draw(seq - 1, (9 - 21, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('v') => {
+                        player.play("d", seq - 1, ndur);
+                        draw(seq - 1, (10 - 21, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('g') => {
+                        player.play("ds", seq - 1, ndur);
+                        draw(seq - 1, (12 - 21, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('b') => {
+                        player.play("e", seq - 1, ndur);
+                        draw(seq - 1, (13 - 21, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('n') => {
+                        player.play("f", seq - 1, ndur);
+                        draw(seq - 1, (16 - 21, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('j') => {
+                        player.play("fs", seq - 1, ndur);
+                        draw(seq - 1, (18 - 21, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('m') => {
+                        player.play("g", seq - 1, ndur);
+                        draw(seq - 1, (19 - 21, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('k') | Key::Ctrl('1') => {
+                        player.play("gs", seq - 1, ndur);
+                        draw(seq - 1, (21 - 21, c, false), mdur, rb);
+                    }
+                    Key::Ctrl(',') | Key::Ctrl('q') => {
+                        player.play("a", seq - 1, ndur);
+                        draw(seq - 1, (22 - 21, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('l') | Key::Ctrl('2') => {
+                        player.play("as", seq - 1, ndur);
+                        draw(seq - 1, (24 - 21, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('.') | Key::Ctrl('w') => {
+                        player.play("b", seq - 1, ndur);
+                        draw(seq - 1, (25 - 21, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('/') | Key::Ctrl('e') => {
+                        player.play("c", seq, ndur);
+                        draw(seq, (28 - 42, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('\'') | Key::Ctrl('4') => {
+                        player.play("cs", seq, ndur);
+                        draw(seq, (30 - 42, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('r') => {
+                        player.play("d", seq, ndur);
+                        draw(seq, (31 - 42, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('5') => {
+                        player.play("ds", seq, ndur);
+                        draw(seq, (33 - 42, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('t') => {
+                        player.play("e", seq, ndur);
+                        draw(seq, (34 - 42, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('y') => {
+                        player.play("f", seq, ndur);
+                        draw(seq, (37 - 42, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('7') => {
+                        player.play("fs", seq, ndur);
+                        draw(seq, (39 - 42, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('u') => {
+                        player.play("g", seq, ndur);
+                        draw(seq, (40 - 42, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('8') => {
+                        player.play("gs", seq, ndur);
+                        draw(seq, (42 - 42, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('i') => {
+                        player.play("a", seq, ndur);
+                        draw(seq, (43 - 42, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('9') => {
+                        player.play("as", seq, ndur);
+                        draw(seq, (45 - 42, c, false), mdur, rb);
+                    }
+                    Key::Ctrl('o') => {
+                        player.play("b", seq, ndur);
+                        draw(seq, (46 - 42, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('p') => {
+                        player.play("c", seq + 1, ndur);
+                        draw(seq + 1, (49 - 63, c, true), mdur, rb);
+                    }
+                    Key::Ctrl('[') => {
+                        if seq < 5 {
+                            player.play("d", seq + 1, ndur);
+                            draw(seq + 1, (52 - 63, c, true), mdur, rb);
+                        }
+                    }
+                    Key::Ctrl(']') => {
+                        if seq < 5 {
+                            player.play("e", seq + 1, ndur);
+                            draw(seq + 1, (55 - 63, c, true), mdur, rb);
+                        }
+                    }
+                    Key::Ctrl('a') => {
+                        if seq > 0 {
+                            player.play("gs", seq - 2, ndur);
+                            draw(seq - 2, (0, c, false), mdur, rb);
+                        }
+                    }
                     Key::Right => { if seq < 5 { seq += 1 } }
                     Key::Left => { if seq > 0 { seq -= 1 } }
                     Key::Up => { if ndur < 8000 { ndur += 50 } }
