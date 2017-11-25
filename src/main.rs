@@ -1,3 +1,5 @@
+mod notes;
+
 extern crate clap;
 extern crate rodio;
 extern crate rustbox;
@@ -43,12 +45,12 @@ impl Player {
         }
     }
 
-    fn get(&self, note: &str, sequence: i16) -> Option<BufReader<Cursor<Vec<u8>>>> {
+    fn get(&self, note: String, sequence: i16) -> Option<BufReader<Cursor<Vec<u8>>>> {
         self.samples.get(&format!("{}{}", note, sequence))
             .map(|v| BufReader::new(Cursor::new(v.clone())))
     }
 
-    fn play(&self, note: &str, sequence: i16, duration: u32) {
+    fn play(&self, note: String, sequence: i16, duration: u32) {
         self.get(note, sequence)
             .map(|note| {
                 let sink = rodio::play_once(&self.endpoint, note).expect("Cannot play");
@@ -113,7 +115,7 @@ fn print_blackkeys(rustbox: &Arc<Mutex<RustBox>>) {
 }
 
 
-fn draw(sequence: i16, mark: (i16, &str, bool), duration: u32, rustbox: Arc<Mutex<RustBox>>) {
+fn draw(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<RustBox>>) {
     let rb_colors = [
         Color::Black,
         Color::Red,
@@ -136,10 +138,8 @@ fn draw(sequence: i16, mark: (i16, &str, bool), duration: u32, rustbox: Arc<Mute
         "white"
     ];
 
-    let (x, color, white) = mark;
     let color_pos = colors.iter().position(|&c| c == color).unwrap();
 
-    let pos = x + (sequence + 1) * 21;
     if white {
         rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒▒");
     } else {
@@ -209,10 +209,10 @@ fn main() {
 
     print_whitekeys(&rb);
     print_blackkeys(&rb);
-    let mut seq: i16 = matches.value_of("sequence").unwrap_or("2").parse().unwrap();
-    let mut ndur: u32 = matches.value_of("noteduration").unwrap_or("0").parse().unwrap();
-    let mdur: u32 = matches.value_of("markduration").unwrap_or("500").parse().unwrap();
-    let c = matches.value_of("color").unwrap_or("red");
+    let mut raw_sequence: i16 = matches.value_of("sequence").unwrap_or("2").parse().unwrap();
+    let mut note_duration: u32 = matches.value_of("noteduration").unwrap_or("0").parse().unwrap();
+    let mark_duration: u32 = matches.value_of("markduration").unwrap_or("500").parse().unwrap();
+    let color = matches.value_of("color").unwrap_or("red");
     rb.lock().unwrap().present();
 
     loop {
@@ -221,142 +221,35 @@ fn main() {
         match pe {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 // println!("{:?}", key);
+                let note = notes::match_note(key, raw_sequence);
+                if note.position > 0 && note.position < 155 {
+                    player.play(note.sound, note.sequence, note_duration);
+                    draw(note.position, note.white, color, mark_duration, rb);
+                }
                 match key {
-                    Key::Char('z') => {
-                        player.play("a", seq - 1, ndur);
-                        draw(seq - 1, (1, c, true), mdur, rb);
-                    }
-                    Key::Char('s') => {
-                        player.play("as", seq - 1, ndur);
-                        draw(seq - 1, (3, c, false), mdur, rb);
-                    }
-                    Key::Char('x') => {
-                        player.play("b", seq - 1, ndur);
-                        draw(seq - 1, (4, c, true), mdur, rb);
-                    }
-                    Key::Char('c') => {
-                        player.play("c", seq, ndur);
-                        draw(seq, (7 - 21, c, true), mdur, rb);
-                    }
-                    Key::Char('f') => {
-                        player.play("cs", seq, ndur);
-                        draw(seq, (9 - 21, c, false), mdur, rb);
-                    }
-                    Key::Char('v') => {
-                        player.play("d", seq, ndur);
-                        draw(seq, (10 - 21, c, true), mdur, rb);
-                    }
-                    Key::Char('g') => {
-                        player.play("ds", seq, ndur);
-                        draw(seq, (12 - 21, c, false), mdur, rb);
-                    }
-                    Key::Char('b') => {
-                        player.play("e", seq, ndur);
-                        draw(seq, (13 - 21, c, true), mdur, rb);
-                    }
-                    Key::Char('n') => {
-                        player.play("f", seq, ndur);
-                        draw(seq, (16 - 21, c, true), mdur, rb);
-                    }
-                    Key::Char('j') => {
-                        player.play("fs", seq, ndur);
-                        draw(seq, (18 - 21, c, false), mdur, rb);
-                    }
-                    Key::Char('m') => {
-                        player.play("g", seq, ndur);
-                        draw(seq, (19 - 21, c, true), mdur, rb);
-                    }
-                    Key::Char('k') | Key::Char('1') => {
-                        player.play("gs", seq, ndur);
-                        draw(seq, (21 - 21, c, false), mdur, rb);
-                    }
-                    Key::Char(',') | Key::Char('q') => {
-                        player.play("a", seq, ndur);
-                        draw(seq, (22 - 21, c, true), mdur, rb);
-                    }
-                    Key::Char('l') | Key::Char('2') => {
-                        player.play("as", seq, ndur);
-                        draw(seq, (24 - 21, c, false), mdur, rb);
-                    }
-                    Key::Char('.') | Key::Char('w') => {
-                        player.play("b", seq, ndur);
-                        draw(seq, (25 - 21, c, true), mdur, rb);
-                    }
-                    Key::Char('/') | Key::Char('e') => {
-                        player.play("c", seq + 1, ndur);
-                        draw(seq + 1, (28 - 42, c, true), mdur, rb);
-                    }
-                    Key::Char('\'') | Key::Char('4') => {
-                        player.play("cs", seq + 1, ndur);
-                        draw(seq + 1, (30 - 42, c, false), mdur, rb);
-                    }
-                    Key::Char('r') => {
-                        player.play("d", seq + 1, ndur);
-                        draw(seq + 1, (31 - 42, c, true), mdur, rb);
-                    }
-                    Key::Char('5') => {
-                        player.play("ds", seq + 1, ndur);
-                        draw(seq + 1, (33 - 42, c, false), mdur, rb);
-                    }
-                    Key::Char('t') => {
-                        player.play("e", seq + 1, ndur);
-                        draw(seq + 1, (34 - 42, c, true), mdur, rb);
-                    }
-                    Key::Char('y') => {
-                        player.play("f", seq + 1, ndur);
-                        draw(seq + 1, (37 - 42, c, true), mdur, rb);
-                    }
-                    Key::Char('7') => {
-                        player.play("fs", seq + 1, ndur);
-                        draw(seq + 1, (39 - 42, c, false), mdur, rb);
-                    }
-                    Key::Char('u') => {
-                        player.play("g", seq + 1, ndur);
-                        draw(seq + 1, (40 - 42, c, true), mdur, rb);
-                    }
-                    Key::Char('8') => {
-                        player.play("gs", seq + 1, ndur);
-                        draw(seq + 1, (42 - 42, c, false), mdur, rb);
-                    }
-                    Key::Char('i') => {
-                        player.play("a", seq + 1, ndur);
-                        draw(seq + 1, (43 - 42, c, true), mdur, rb);
-                    }
-                    Key::Char('9') => {
-                        player.play("as", seq + 1, ndur);
-                        draw(seq + 1, (45 - 42, c, false), mdur, rb);
-                    }
-                    Key::Char('o') => {
-                        player.play("b", seq + 1, ndur);
-                        draw(seq + 1, (46 - 42, c, true), mdur, rb);
-                    }
-                    Key::Char('p') => {
-                        player.play("c", seq + 2, ndur);
-                        draw(seq + 2, (49 - 63, c, true), mdur, rb);
-                    }
-                    Key::Char('[') => {
-                        if seq < 5 {
-                            player.play("d", seq + 2, ndur);
-                            draw(seq + 2, (52 - 63, c, true), mdur, rb);
+                    Key::Right => {
+                        if raw_sequence < 5 {
+                            raw_sequence += 1;
                         }
                     }
-                    Key::Char(']') => {
-                        if seq < 5 {
-                            player.play("e", seq + 2, ndur);
-                            draw(seq + 2, (55 - 63, c, true), mdur, rb);
+                    Key::Left => {
+                        if raw_sequence > 0 {
+                            raw_sequence -= 1;
                         }
                     }
-                    Key::Char('a') => {
-                        if seq > 0 {
-                            player.play("gs", seq - 1, ndur);
-                            draw(seq - 1, (0, c, false), mdur, rb);
+                    Key::Up => {
+                        if note_duration < 8000 {
+                            note_duration += 50;
                         }
                     }
-                    Key::Right => { if seq < 5 { seq += 1 } }
-                    Key::Left => { if seq > 0 { seq -= 1 } }
-                    Key::Up => { if ndur < 8000 { ndur += 50 } }
-                    Key::Down => { if ndur > 0 { ndur -= 50 } }
-                    Key::Esc => { break; }
+                    Key::Down => {
+                        if note_duration > 0 {
+                            note_duration -= 50;
+                        }
+                    }
+                    Key::Esc => {
+                        break;
+                    }
                     _ => {}
                 }
             }
