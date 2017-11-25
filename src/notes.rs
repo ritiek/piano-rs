@@ -3,6 +3,7 @@ extern crate rustbox;
 use rustbox::Key;
 
 
+#[derive(Debug)]
 pub struct Note {
     pub sound: String,
     pub sequence: i16,
@@ -11,10 +12,11 @@ pub struct Note {
 }
 
 pub fn match_note(key: rustbox::Key, seq: i16) -> Note {
+    //TODO: return smthn instinctive instead of fake data if key not matched
     let mut sound = String::new();
     let mut white = true;
-    let mut factor = 0;
-    let mut init_pos = -1;
+    let mut factor = -1;
+    let mut init_pos = -106;
 
     match key {
         Key::Char('z') => {
@@ -78,7 +80,7 @@ pub fn match_note(key: rustbox::Key, seq: i16) -> Note {
             factor = 0;
         }
         Key::Char('m') => {
-            sound = "a".to_string();
+            sound = "g".to_string();
             init_pos = 19;
             white = true;
             factor = 0;
@@ -206,8 +208,8 @@ pub fn match_note(key: rustbox::Key, seq: i16) -> Note {
         _ => {}
     }
 
+    let position = init_pos + 21 * seq;
     let sequence = seq + factor;
-    let position = init_pos - ((factor + 1) * 21);
 
     Note {
         sound: sound,

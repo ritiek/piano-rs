@@ -115,7 +115,7 @@ fn print_blackkeys(rustbox: &Arc<Mutex<RustBox>>) {
 }
 
 
-fn draw(sequence: i16, mark: (i16, &str, bool), duration: u32, rustbox: Arc<Mutex<RustBox>>) {
+fn draw(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<RustBox>>) {
     let rb_colors = [
         Color::Black,
         Color::Red,
@@ -138,10 +138,8 @@ fn draw(sequence: i16, mark: (i16, &str, bool), duration: u32, rustbox: Arc<Mute
         "white"
     ];
 
-    let (x, color, white) = mark;
     let color_pos = colors.iter().position(|&c| c == color).unwrap();
 
-    let pos = x + (sequence + 1) * 21;
     if white {
         rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒▒");
     } else {
@@ -222,10 +220,12 @@ fn main() {
         let rb = rb.clone();
         match pe {
             Ok(rustbox::Event::KeyEvent(key)) => {
-                let note = notes::match_note(key, raw_sequence);
-                player.play(note.sound, note.sequence, note_duration);
-                draw(note.sequence, (note.position, color, note.white), mark_duration, rb);
                 // println!("{:?}", key);
+                let note = notes::match_note(key, raw_sequence);
+                if note.position > 0 && note.position < 155 {
+                    player.play(note.sound, note.sequence, note_duration);
+                    draw(note.position, note.white, color, mark_duration, rb);
+                }
                 match key {
                     Key::Right => {
                         if raw_sequence < 5 {
