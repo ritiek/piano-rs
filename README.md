@@ -37,8 +37,8 @@ OPTIONS:
 ```
 
 - Press keys on your PC keyboard to play the notes.
-- Adjust note frequency while playing using <kbd>←</kbd> and <kbd>→</kbd>.
-- Adjust note duration while playing using <kbd>↑</kbd> and <kbd>↓</kbd>.
+- Adjust note frequency using <kbd>←</kbd> and <kbd>→</kbd> (or hold <kbd>ctrl</kbd> or <kbd>shift</kbd> respectively while playing).
+- Adjust note duration using <kbd>↑</kbd> and <kbd>↓</kbd>.
 
 ## Resources
 
