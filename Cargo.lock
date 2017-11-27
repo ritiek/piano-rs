@@ -1,12 +1,3 @@
-[root]
-name = "piano-rs"
-version = "0.1.0"
-dependencies = [
- "clap 2.27.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rodio 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustbox 0.9.0 (git+https://github.com/gchp/rustbox)",
-]
-
 [[package]]
 name = "alsa-sys"
 version = "0.1.1"
@@ -221,6 +212,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "winapi 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi-build 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "piano-rs"
+version = "0.1.0"
+dependencies = [
+ "clap 2.27.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rodio 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustbox 0.9.0 (git+https://github.com/gchp/rustbox)",
 ]
 
 [[package]]
