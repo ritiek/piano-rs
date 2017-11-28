@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ritiek/piano-rs.svg?branch=master)](https://travis-ci.org/ritiek/piano-rs)
 
-Play piano in the terminal using PC keyboard.
+Play piano in the terminal using PC (computer) keyboard.
 
 ## Screenshots
 
