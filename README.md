@@ -40,6 +40,12 @@ OPTIONS:
 - Adjust note frequency using <kbd>←</kbd> and <kbd>→</kbd> (or hold <kbd>ctrl</kbd> or <kbd>shift</kbd> respectively while playing).
 - Adjust note duration using <kbd>↑</kbd> and <kbd>↓</kbd>.
 
+## Running tests
+
+```
+cargo test
+```
+
 ## Resources
 
 - piano-rs uses the same notes and key bindings as [multiplayerpiano.com](http://multiplayerpiano.com).

@@ -220,7 +220,6 @@ fn main() {
         let rb = rb.clone();
         match pe {
             Ok(rustbox::Event::KeyEvent(key)) => {
-                // println!("{:?}", key);
                 let note = notes::match_note(key, raw_sequence);
                 if note.position > 0 && note.position < 155 {
                     player.play(note.sound, note.sequence, note_duration);
@@ -256,5 +255,52 @@ fn main() {
             Err(e) => panic!("{}", e),
             _ => {}
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::{notes, Key};
+    use std::path::Path;
+
+    #[test]
+    fn check_missing_notes() {
+        // find missing notes in assets/*.ogg, if any
+        let mut missing_notes = Vec::new();
+        let expected_notes = ["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"];
+        for expected_note in expected_notes.iter() {
+            if expected_note == &"a" || expected_note == &"as" {
+                let note = format!("{}-1.ogg", expected_note);
+				let note_path = format!("assets/{}", note);
+                if !Path::new(&note_path).exists() {
+                    missing_notes.push(note);
+                }
+            }
+			for sequence in 0..8_u16 {
+				let note = format!("{}{}.ogg", expected_note, sequence);
+				let note_path = format!("assets/{}", note);
+                if !Path::new(&note_path).exists() {
+                    missing_notes.push(note);
+                }
+            }
+        }
+
+        assert!(missing_notes.len() == 0,
+                "Some note sounds are missing: {}", missing_notes.join(", "));
+    }
+
+    #[test]
+    fn check_note_attributes() {
+        // check attributes for random note
+        let note = notes::match_note(Key::Char('q'), 2);
+        let expect_note = notes::Note {
+                                sound: "a".to_string(),
+                                sequence: 2,
+                                position: 64,
+                                white: true
+                           };
+
+        assert_eq!(note, expect_note);
     }
 }

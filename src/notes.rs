@@ -5,6 +5,7 @@ use rustbox::Key;
 use std::ascii::AsciiExt;
 
 
+#[derive(Debug, PartialEq)]
 pub struct Note {
     pub sound: String,
     pub sequence: i16,
