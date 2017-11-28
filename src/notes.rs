@@ -2,6 +2,8 @@ extern crate rustbox;
 
 use rustbox::Key;
 
+use std::ascii::AsciiExt;
+
 
 pub struct Note {
     pub sound: String,
