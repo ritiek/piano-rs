@@ -158,6 +158,7 @@ fn draw(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<Ru
     });
 }
 
+
 fn main() {
     let matches = App::new("piano-rs")
         .version("0.1.0")
