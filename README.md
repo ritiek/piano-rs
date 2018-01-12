@@ -45,7 +45,7 @@ OPTIONS:
 ## Running tests
 
 ```
-cargo test
+$ cargo test
 ```
 
 ## Resources
