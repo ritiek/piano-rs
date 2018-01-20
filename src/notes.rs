@@ -45,15 +45,28 @@ pub fn match_note(mut key: rustbox::Key, mut raw_seq: i16) -> Note {
                    0, 1, 1, 1, 1, 1, 1, 1, 1,
                    1, 1, 1, 1, 1, 1, 2, 2, 2, -1];
 
+    let special = ['!', '@', '$', '%', '&', '*', '(', '"', '<',
+                   '>', '?', '{', '}'];
+
+    let special_matches = ['1', '2', '4', '5', '7', '8', '9', '\'', ',',
+                           '.', '/', '[', ']'];
+
 
     if let Key::Ctrl(c) = key {
         key = Key::Char(c);
         raw_seq -= 1;
     }
 
+    // increment `raw_seq` if key was shift prefixed
     if let Key::Char(mut c) = key {
         if c.is_uppercase() {
             c = c.to_ascii_lowercase();
+            raw_seq += 1;
+        } else if special.contains(&c) {
+            let j = special.iter()
+                           .position(|&key| key == c)
+                           .unwrap();
+            c = special_matches[j];
             raw_seq += 1;
         }
 
