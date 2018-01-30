@@ -31,7 +31,7 @@ impl Player {
 
         for note in ["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"].iter() {
             for sequence in -1..8_i16 {
-                Player::read_note(*note, sequence)
+                Self::read_note(*note, sequence)
                     .and_then(|sample| {
                         samples.insert(format!("{}{}", note, sequence), sample);
                         Some(())
@@ -45,12 +45,12 @@ impl Player {
         }
     }
 
-    fn get(&self, note: String, sequence: i16) -> Option<BufReader<Cursor<Vec<u8>>>> {
+    fn get(&self, note: &str, sequence: i16) -> Option<BufReader<Cursor<Vec<u8>>>> {
         self.samples.get(&format!("{}{}", note, sequence))
             .map(|v| BufReader::new(Cursor::new(v.clone())))
     }
 
-    fn play(&self, note: String, sequence: i16, duration: u32) {
+    fn play(&self, note: &str, sequence: i16, duration: u32) {
         self.get(note, sequence)
             .map(|note| {
                 let sink = rodio::play_once(&self.endpoint, note).expect("Cannot play");
@@ -76,6 +76,16 @@ impl Player {
                 file.read_to_end(&mut data).unwrap();
                 data
             }).ok()
+    }
+
+    fn write_note(&self, note: &str, sequence: i16, duration: u32,
+                  file_path: &str, time_diff: time::Duration) {
+        println!("{}", Self::get_ms(time_diff));
+    }
+
+    fn get_ms(time_diff: time::Duration) -> u64 {
+        let nanos = time_diff.subsec_nanos() as u64;
+		(1000*1000*1000 * time_diff.as_secs() + nanos)/(1000 * 1000)
     }
 }
 
@@ -215,6 +225,7 @@ fn main() {
     let mark_duration: u32 = matches.value_of("markduration").unwrap_or("500").parse().unwrap();
     let color = matches.value_of("color").unwrap_or("red");
     rb.lock().unwrap().present();
+    let mut now = time::Instant::now();
 
     loop {
         let pe = rb.lock().unwrap().poll_event(false);
@@ -223,8 +234,11 @@ fn main() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 let note = notes::match_note(key, raw_sequence);
                 if note.position > 0 && note.position < 155 {
-                    player.play(note.sound, note.sequence, note_duration);
+                    player.play(&note.sound, note.sequence, note_duration);
                     draw(note.position, note.white, color, mark_duration, rb);
+                    player.write_note(&note.sound, note.sequence, note_duration,
+                                      "notes.txt", now.elapsed());
+                    now = time::Instant::now();
                 }
                 match key {
                     Key::Right => {
