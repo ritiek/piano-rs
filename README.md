@@ -1,5 +1,6 @@
 # piano-rs
 
+![Rust Toolchain](https://img.shields.io/badge/rust-stable-brightgreen.svg)
 [![Build Status](https://travis-ci.org/ritiek/piano-rs.svg?branch=master)](https://travis-ci.org/ritiek/piano-rs)
 
 Play piano in the terminal using PC (computer) keyboard.
