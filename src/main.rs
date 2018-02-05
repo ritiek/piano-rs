@@ -9,6 +9,8 @@ use std::io::{BufReader, Read, Cursor};
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
 use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 
 use clap::{Arg, App};
 
@@ -79,8 +81,21 @@ impl Player {
     }
 
     fn write_note(&self, note: &str, sequence: i16, duration: u32,
-                  file_path: &str, time_diff: time::Duration) {
-        println!("{}", Self::get_ms(time_diff));
+                  file_path: &str, time_diff: time::Duration, n: u32) {
+        let diff_in_ms = Self::get_ms(time_diff);
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .append(true)
+            .open(file_path)
+            .unwrap();
+        let note_details = format!("note_{}:\n  - {}\n  - {}\n  - {}\n  - {}\n",
+                                   n, note, sequence, duration, diff_in_ms);
+
+        println!("{}", note_details);
+        if let Err(e) = writeln!(file, "{}", note_details) {
+            eprintln!("Couldn't write to file: {}", e);
+        }
     }
 
     fn get_ms(time_diff: time::Duration) -> u64 {
@@ -226,6 +241,7 @@ fn main() {
     let color = matches.value_of("color").unwrap_or("red");
     rb.lock().unwrap().present();
     let mut now = time::Instant::now();
+    let mut note_number = 1;
 
     loop {
         let pe = rb.lock().unwrap().poll_event(false);
@@ -237,7 +253,8 @@ fn main() {
                     player.play(&note.sound, note.sequence, note_duration);
                     draw(note.position, note.white, color, mark_duration, rb);
                     player.write_note(&note.sound, note.sequence, note_duration,
-                                      "notes.txt", now.elapsed());
+                                      "notes.yml", now.elapsed(), note_number);
+                    note_number += 1;
                     now = time::Instant::now();
                 }
                 match key {
