@@ -92,10 +92,9 @@ impl Player {
             .append(true)
             .open(file_path)
             .unwrap();
-        let note_details = format!("note_{}:\n  - {}\n  - {}\n  - {}\n  - {}\n",
-                                   n, note, sequence, duration, diff_in_ms);
+        let note_details = format!("note_{}:\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n",
+                                   n, note, sequence, duration, diff_in_ms, position, white);
 
-        println!("{}", note_details);
         if let Err(e) = writeln!(file, "{}", note_details) {
             eprintln!("Couldn't write to file: {}", e);
         }
@@ -283,11 +282,11 @@ fn main() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 let note = notes::match_note(key, raw_sequence);
                 if note.position > 0 && note.position < 155 {
-                    player.play(&note.sound, note.sequence, note_duration);
-                    draw(note.position, note.white, color, mark_duration, rb);
                     player.write_note(&note.sound, note.sequence, note_duration,
                                       note.position, note.white, "notes.yml",
                                       now.elapsed(), note_number);
+                    player.play(&note.sound, note.sequence, note_duration);
+                    draw(note.position, note.white, color, mark_duration, rb);
                     note_number += 1;
                     now = time::Instant::now();
                 }
