@@ -3,6 +3,7 @@ mod notes;
 extern crate clap;
 extern crate rodio;
 extern crate rustbox;
+extern crate yaml_rust;
 
 use std::default::Default;
 use std::io::{BufReader, Read, Cursor};
@@ -10,7 +11,9 @@ use std::sync::{Arc, Mutex};
 use std::{thread, time};
 use std::collections::HashMap;
 use std::fs::OpenOptions;
+use std::fs::File;
 use std::io::prelude::*;
+use yaml_rust::{YamlLoader, YamlEmitter, Yaml};
 
 use clap::{Arg, App};
 
@@ -80,7 +83,7 @@ impl Player {
             }).ok()
     }
 
-    fn write_note(&self, note: &str, sequence: i16, duration: u32,
+    fn write_note(&self, note: &str, sequence: i16, duration: u32, position: i16, white: bool,
                   file_path: &str, time_diff: time::Duration, n: u32) {
         let diff_in_ms = Self::get_ms(time_diff);
         let mut file = OpenOptions::new()
@@ -243,6 +246,28 @@ fn main() {
     let mut now = time::Instant::now();
     let mut note_number = 1;
 
+    let mut file = File::open("notes.yml").expect("Unable to open the file");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("Unable to read the file");
+    let docs = YamlLoader::load_from_str(&s).unwrap();
+    let doc = &docs[0];
+    let mut note_num = 1;
+    loop {
+        let rb = rb.clone();
+        let note = format!("note_{}", note_num);
+        let note_ops = match &doc[note.as_str()] {
+            &Yaml::Array(ref x) => x,
+            _ => break,
+        };
+        player.play(note_ops[0].as_str().unwrap(),
+                    note_ops[1].as_i64().unwrap() as i16,
+                    note_ops[2].as_i64().unwrap() as u32);
+        draw(note_ops[4].as_i64().unwrap() as i16, note_ops[5].as_bool().unwrap(), color, mark_duration, rb);
+        let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
+        thread::sleep(duration);
+        note_num += 1;
+    }
+
     loop {
         let pe = rb.lock().unwrap().poll_event(false);
         let rb = rb.clone();
@@ -253,7 +278,8 @@ fn main() {
                     player.play(&note.sound, note.sequence, note_duration);
                     draw(note.position, note.white, color, mark_duration, rb);
                     player.write_note(&note.sound, note.sequence, note_duration,
-                                      "notes.yml", now.elapsed(), note_number);
+                                      note.position, note.white, "notes.yml",
+                                      now.elapsed(), note_number);
                     note_number += 1;
                     now = time::Instant::now();
                 }

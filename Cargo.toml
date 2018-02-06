@@ -13,6 +13,7 @@ license = "MIT"
 clap = "2.27"
 rodio = "0.5"
 rustbox = { git = "https://github.com/gchp/rustbox" }
+yaml-rust = "0.4"
 
 [[bin]]
 name = "piano-rs"
