@@ -187,6 +187,34 @@ fn draw(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<Ru
 }
 
 
+fn play_from_file(filename: &str, color: &str, mark_duration: u32,
+                  rustbox: Arc<Mutex<RustBox>>) {
+    let mut file = File::open(filename).expect("Unable to open the file");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("Unable to read the file");
+    let docs = YamlLoader::load_from_str(&s).unwrap();
+    let doc = &docs[0];
+    let mut note_num = 1;
+    let player = Player::new();
+
+    loop {
+        let rustbox = rustbox.clone();
+        let note = format!("note_{}", note_num);
+        let note_ops = match &doc[note.as_str()] {
+            &Yaml::Array(ref x) => x,
+            _ => break,
+        };
+        player.play(note_ops[0].as_str().unwrap(),
+                    note_ops[1].as_i64().unwrap() as i16,
+                    note_ops[2].as_i64().unwrap() as u32);
+        draw(note_ops[4].as_i64().unwrap() as i16, note_ops[5].as_bool().unwrap(), color, mark_duration, rustbox);
+        let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
+        thread::sleep(duration);
+        note_num += 1;
+    }
+}
+
+
 fn main() {
     let matches = App::new("piano-rs")
         .version("0.1.0")
@@ -246,27 +274,7 @@ fn main() {
     let mut now = time::Instant::now();
     let mut note_number = 1;
 
-    let mut file = File::open("notes.yml").expect("Unable to open the file");
-    let mut s = String::new();
-    file.read_to_string(&mut s).expect("Unable to read the file");
-    let docs = YamlLoader::load_from_str(&s).unwrap();
-    let doc = &docs[0];
-    let mut note_num = 1;
-    loop {
-        let rb = rb.clone();
-        let note = format!("note_{}", note_num);
-        let note_ops = match &doc[note.as_str()] {
-            &Yaml::Array(ref x) => x,
-            _ => break,
-        };
-        player.play(note_ops[0].as_str().unwrap(),
-                    note_ops[1].as_i64().unwrap() as i16,
-                    note_ops[2].as_i64().unwrap() as u32);
-        draw(note_ops[4].as_i64().unwrap() as i16, note_ops[5].as_bool().unwrap(), color, mark_duration, rb);
-        let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
-        thread::sleep(duration);
-        note_num += 1;
-    }
+    play_from_file("notes.yml", color, mark_duration, rb.clone());
 
     loop {
         let pe = rb.lock().unwrap().poll_event(false);
