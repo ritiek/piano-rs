@@ -1,5 +1,3 @@
-extern crate rustbox;
-
 use rustbox::Key;
 
 use std::ascii::AsciiExt;
@@ -13,7 +11,7 @@ pub struct Note {
     pub white: bool,
 }
 
-pub fn match_note(mut key: rustbox::Key, mut raw_seq: i16) -> Note {
+pub fn match_note(mut key: Key, mut raw_seq: i16) -> Note {
     //TODO: return smthn instinctive instead of fake data if key not matched
     let mut sound = String::new();
     let mut white = true;
