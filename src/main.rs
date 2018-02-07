@@ -14,9 +14,8 @@ use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::fs::File;
 use std::io::prelude::*;
-use yaml_rust::{YamlLoader, Yaml};
 
-//use clap::{Arg, App};
+use yaml_rust::{YamlLoader, Yaml};
 
 use rustbox::{Color, RustBox};
 use rustbox::Key;
