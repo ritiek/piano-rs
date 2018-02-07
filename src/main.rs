@@ -203,12 +203,12 @@ fn play_from_file(filename: &str, color: &str, mark_duration: u32,
             &Yaml::Array(ref x) => x,
             _ => break,
         };
+        let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
+        thread::sleep(duration);
         player.play(note_ops[0].as_str().unwrap(),
                     note_ops[1].as_i64().unwrap() as i16,
                     note_ops[2].as_i64().unwrap() as u32);
         draw(note_ops[4].as_i64().unwrap() as i16, note_ops[5].as_bool().unwrap(), color, mark_duration, rustbox);
-        let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
-        thread::sleep(duration);
         note_num += 1;
     }
 }
