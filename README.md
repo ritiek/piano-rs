@@ -23,7 +23,7 @@ Once it compiles, run the binary in `./target/release/piano-rs`:
 ```
 $ ./target/release/piano-rs -h
 
-Play piano in the terminal using PC keyboard.
+Play piano in the terminal using PC (computer) keyboard.
 
 USAGE:
     piano-rs [OPTIONS]
@@ -36,12 +36,18 @@ OPTIONS:
     -c, --color <COLOR>               Color of block to generate when a note is played (Default: "red")
     -m, --mark-duration <DURATION>    Duration to show piano mark for, in ms (Default: 500)
     -n, --note-duration <DURATION>    Duration to play each note for, where 0 means till the end of note (Default: 0)
+    -p, --playfile <FILEPATH>         Play notes from .yml file (Default: none)
+    -r, --recordfile <FILEPATH>       Record notes to .yml file (Default: none)
+    -x, --replaycolor <COLOR>         Color of block to generate when notes are played from file (Default: "blue")
     -s, --sequence <SEQUENCE>         Frequency sequence from 0 to 5 to begin with (Default: 2)
 ```
 
 - Press keys on your PC keyboard to play the notes.
-- Adjust note frequency using <kbd>←</kbd> and <kbd>→</kbd> (or hold <kbd>ctrl</kbd> or <kbd>shift</kbd> respectively while playing).
+- Adjust note frequency using <kbd>←</kbd> and <kbd>→</kbd>
+  (or hold <kbd>ctrl</kbd> or <kbd>shift</kbd> respectively while playing).
 - Adjust note duration using <kbd>↑</kbd> and <kbd>↓</kbd>.
+- You can also record your playback with `-r <path/to/save/notes.yml>`
+  and play them back with `-p <path/to/save/notes.yml>`.
 
 ## Running tests
 

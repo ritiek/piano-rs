@@ -3,12 +3,17 @@ mod notes;
 extern crate clap;
 extern crate rodio;
 extern crate rustbox;
+extern crate yaml_rust;
 
 use std::default::Default;
 use std::io::{BufReader, Read, Cursor};
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
 use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::fs::File;
+use std::io::prelude::*;
+use yaml_rust::{YamlLoader, YamlEmitter, Yaml};
 
 use clap::{Arg, App};
 
@@ -31,7 +36,7 @@ impl Player {
 
         for note in ["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"].iter() {
             for sequence in -1..8_i16 {
-                Player::read_note(*note, sequence)
+                Self::read_note(*note, sequence)
                     .and_then(|sample| {
                         samples.insert(format!("{}{}", note, sequence), sample);
                         Some(())
@@ -45,12 +50,12 @@ impl Player {
         }
     }
 
-    fn get(&self, note: String, sequence: i16) -> Option<BufReader<Cursor<Vec<u8>>>> {
+    fn get(&self, note: &str, sequence: i16) -> Option<BufReader<Cursor<Vec<u8>>>> {
         self.samples.get(&format!("{}{}", note, sequence))
             .map(|v| BufReader::new(Cursor::new(v.clone())))
     }
 
-    fn play(&self, note: String, sequence: i16, duration: u32) {
+    fn play(&self, note: &str, sequence: i16, duration: u32) {
         self.get(note, sequence)
             .map(|note| {
                 let sink = rodio::play_once(&self.endpoint, note).expect("Cannot play");
@@ -76,6 +81,28 @@ impl Player {
                 file.read_to_end(&mut data).unwrap();
                 data
             }).ok()
+    }
+
+    fn write_note(&self, note: &str, sequence: i16, duration: u32, position: i16, white: bool,
+                  file_path: &str, time_diff: time::Duration, n: u32) {
+        let diff_in_ms = Self::get_ms(time_diff);
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .append(true)
+            .open(file_path)
+            .unwrap();
+        let note_details = format!("note_{}:\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n",
+                                   n, note, sequence, duration, diff_in_ms, position, white);
+
+        if let Err(e) = writeln!(file, "{}", note_details) {
+            eprintln!("Couldn't write to file: {}", e);
+        }
+    }
+
+    fn get_ms(time_diff: time::Duration) -> u64 {
+        let nanos = time_diff.subsec_nanos() as u64;
+		(1000*1000*1000 * time_diff.as_secs() + nanos)/(1000 * 1000)
     }
 }
 
@@ -159,11 +186,53 @@ fn draw(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<Ru
 }
 
 
+fn play_from_file(filename: &str, color: &str, mark_duration: u32,
+                  rustbox: Arc<Mutex<RustBox>>) {
+    let mut file = File::open(filename).expect("Unable to open the file");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("Unable to read the file");
+    let docs = YamlLoader::load_from_str(&s).unwrap();
+    let doc = &docs[0];
+    let mut note_num = 1;
+    let player = Player::new();
+
+    loop {
+        let rustbox = rustbox.clone();
+        let note = format!("note_{}", note_num);
+        let note_ops = match &doc[note.as_str()] {
+            &Yaml::Array(ref x) => x,
+            _ => break,
+        };
+        let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
+        thread::sleep(duration);
+        player.play(note_ops[0].as_str().unwrap(),
+                    note_ops[1].as_i64().unwrap() as i16,
+                    note_ops[2].as_i64().unwrap() as u32);
+        draw(note_ops[4].as_i64().unwrap() as i16, note_ops[5].as_bool().unwrap(), color, mark_duration, rustbox);
+        note_num += 1;
+    }
+}
+
+
 fn main() {
     let matches = App::new("piano-rs")
         .version("0.1.0")
         .author("Ritiek Malhotra <ritiekmalhotra123@gmail.com>")
-        .about("Play piano in the terminal using PC keyboard.")
+        .about("Play piano in the terminal using PC (computer) keyboard.")
+
+        .arg(Arg::with_name("record")
+            .short("r")
+            .long("recordfile")
+            .value_name("FILEPATH")
+            .takes_value(true)
+            .help("Record notes to .yml file (Default: none)"))
+
+        .arg(Arg::with_name("play")
+            .short("p")
+            .long("playfile")
+            .value_name("FILEPATH")
+            .takes_value(true)
+            .help("Play notes from .yml file (Default: none)"))
 
         .arg(Arg::with_name("color")
             .short("c")
@@ -171,6 +240,13 @@ fn main() {
             .value_name("COLOR")
             .takes_value(true)
             .help("Color of block to generate when a note is played (Default: \"red\")"))
+
+        .arg(Arg::with_name("replaycolor")
+            .short("x")
+            .long("replaycolor")
+            .value_name("COLOR")
+            .takes_value(true)
+            .help("Color of block to generate when notes are played from file (Default: \"blue\")"))
 
         .arg(Arg::with_name("sequence")
             .short("s")
@@ -214,47 +290,64 @@ fn main() {
     let mut note_duration: u32 = matches.value_of("noteduration").unwrap_or("0").parse().unwrap();
     let mark_duration: u32 = matches.value_of("markduration").unwrap_or("500").parse().unwrap();
     let color = matches.value_of("color").unwrap_or("red");
+    let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
     rb.lock().unwrap().present();
+    let mut now = time::Instant::now();
+    let mut note_number = 1;
 
-    loop {
-        let pe = rb.lock().unwrap().poll_event(false);
-        let rb = rb.clone();
-        match pe {
-            Ok(rustbox::Event::KeyEvent(key)) => {
-                let note = notes::match_note(key, raw_sequence);
-                if note.position > 0 && note.position < 155 {
-                    player.play(note.sound, note.sequence, note_duration);
-                    draw(note.position, note.white, color, mark_duration, rb);
+    if matches.is_present("play") {
+        let playfile = matches.value_of("play").unwrap();
+        play_from_file(playfile, replaycolor, mark_duration, rb.clone());
+    } else {
+        // TODO: put below code into a function or something
+        loop {
+            let pe = rb.lock().unwrap().poll_event(false);
+            let rb = rb.clone();
+            match pe {
+                Ok(rustbox::Event::KeyEvent(key)) => {
+                    let note = notes::match_note(key, raw_sequence);
+                    if note.position > 0 && note.position < 155 {
+                        if matches.is_present("record") {
+                            let record_file = matches.value_of("record").unwrap();
+                            player.write_note(&note.sound, note.sequence, note_duration,
+                                              note.position, note.white, record_file,
+                                              now.elapsed(), note_number);
+                        }
+                        player.play(&note.sound, note.sequence, note_duration);
+                        draw(note.position, note.white, color, mark_duration, rb);
+                        note_number += 1;
+                        now = time::Instant::now();
+                    }
+                    match key {
+                        Key::Right => {
+                            if raw_sequence < 5 {
+                                raw_sequence += 1;
+                            }
+                        }
+                        Key::Left => {
+                            if raw_sequence > 0 {
+                                raw_sequence -= 1;
+                            }
+                        }
+                        Key::Up => {
+                            if note_duration < 8000 {
+                                note_duration += 50;
+                            }
+                        }
+                        Key::Down => {
+                            if note_duration > 0 {
+                                note_duration -= 50;
+                            }
+                        }
+                        Key::Esc => {
+                            break;
+                        }
+                        _ => {}
+                    }
                 }
-                match key {
-                    Key::Right => {
-                        if raw_sequence < 5 {
-                            raw_sequence += 1;
-                        }
-                    }
-                    Key::Left => {
-                        if raw_sequence > 0 {
-                            raw_sequence -= 1;
-                        }
-                    }
-                    Key::Up => {
-                        if note_duration < 8000 {
-                            note_duration += 50;
-                        }
-                    }
-                    Key::Down => {
-                        if note_duration > 0 {
-                            note_duration -= 50;
-                        }
-                    }
-                    Key::Esc => {
-                        break;
-                    }
-                    _ => {}
-                }
+                Err(e) => panic!("{}", e),
+                _ => {}
             }
-            Err(e) => panic!("{}", e),
-            _ => {}
         }
     }
 }

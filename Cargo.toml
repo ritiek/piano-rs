@@ -2,7 +2,7 @@
 name = "piano-rs"
 version = "0.1.0"
 authors = ["Ritiek <ritiekmalhotra123@gmail.com>"]
-description = "Play piano in the terminal using PC keyboard"
+description = "Play piano in the terminal using PC (computer) keyboard"
 repository = "https://github.com/ritiek/piano-rs"
 readme = "README.md"
 keywords = ["music", "piano", "terminal", "cli", "notes"]
@@ -13,6 +13,7 @@ license = "MIT"
 clap = "2.27"
 rodio = "0.5"
 rustbox = { git = "https://github.com/gchp/rustbox" }
+yaml-rust = "0.4"
 
 [[bin]]
 name = "piano-rs"
