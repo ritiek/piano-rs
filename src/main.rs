@@ -218,7 +218,7 @@ fn main() {
     let matches = App::new("piano-rs")
         .version("0.1.0")
         .author("Ritiek Malhotra <ritiekmalhotra123@gmail.com>")
-        .about("Play piano in the terminal using PC keyboard.")
+        .about("Play piano in the terminal using PC (computer) keyboard.")
 
         .arg(Arg::with_name("record")
             .short("r")
