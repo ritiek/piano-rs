@@ -46,8 +46,8 @@ OPTIONS:
 - Adjust note frequency using <kbd>←</kbd> and <kbd>→</kbd>
   (or hold <kbd>ctrl</kbd> or <kbd>shift</kbd> respectively while playing).
 - Adjust note duration using <kbd>↑</kbd> and <kbd>↓</kbd>.
-- You can also record your playback with `-r <path/to/save/notes.yml>`
-  and play them back with `-p <path/to/save/notes.yml>`.
+- You can also record your notes with `-r <path/to/save/notes.yml>`
+  and play them later on with `-p <path/to/save/notes.yml>`.
 
 ## Running tests
 
