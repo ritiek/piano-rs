@@ -241,6 +241,13 @@ fn main() {
             .takes_value(true)
             .help("Color of block to generate when a note is played (Default: \"red\")"))
 
+        .arg(Arg::with_name("replaycolor")
+            .short("x")
+            .long("replaycolor")
+            .value_name("COLOR")
+            .takes_value(true)
+            .help("Color of block to generate when notes are played from file (Default: \"blue\")"))
+
         .arg(Arg::with_name("sequence")
             .short("s")
             .long("sequence")
@@ -283,64 +290,64 @@ fn main() {
     let mut note_duration: u32 = matches.value_of("noteduration").unwrap_or("0").parse().unwrap();
     let mark_duration: u32 = matches.value_of("markduration").unwrap_or("500").parse().unwrap();
     let color = matches.value_of("color").unwrap_or("red");
+    let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
     rb.lock().unwrap().present();
     let mut now = time::Instant::now();
     let mut note_number = 1;
 
     if matches.is_present("play") {
         let playfile = matches.value_of("play").unwrap();
-        play_from_file(playfile, color, mark_duration, rb.clone());
-    } /*else {
-        TODO: put below code into a function or something
-    }*/
-
-    loop {
-        let pe = rb.lock().unwrap().poll_event(false);
-        let rb = rb.clone();
-        match pe {
-            Ok(rustbox::Event::KeyEvent(key)) => {
-                let note = notes::match_note(key, raw_sequence);
-                if note.position > 0 && note.position < 155 {
-                    if matches.is_present("record") {
-                        let record_file = matches.value_of("record").unwrap();
-                        player.write_note(&note.sound, note.sequence, note_duration,
-                                          note.position, note.white, record_file,
-                                          now.elapsed(), note_number);
+        play_from_file(playfile, replaycolor, mark_duration, rb.clone());
+    } else {
+        // TODO: put below code into a function or something
+        loop {
+            let pe = rb.lock().unwrap().poll_event(false);
+            let rb = rb.clone();
+            match pe {
+                Ok(rustbox::Event::KeyEvent(key)) => {
+                    let note = notes::match_note(key, raw_sequence);
+                    if note.position > 0 && note.position < 155 {
+                        if matches.is_present("record") {
+                            let record_file = matches.value_of("record").unwrap();
+                            player.write_note(&note.sound, note.sequence, note_duration,
+                                              note.position, note.white, record_file,
+                                              now.elapsed(), note_number);
+                        }
+                        player.play(&note.sound, note.sequence, note_duration);
+                        draw(note.position, note.white, color, mark_duration, rb);
+                        note_number += 1;
+                        now = time::Instant::now();
                     }
-                    player.play(&note.sound, note.sequence, note_duration);
-                    draw(note.position, note.white, color, mark_duration, rb);
-                    note_number += 1;
-                    now = time::Instant::now();
+                    match key {
+                        Key::Right => {
+                            if raw_sequence < 5 {
+                                raw_sequence += 1;
+                            }
+                        }
+                        Key::Left => {
+                            if raw_sequence > 0 {
+                                raw_sequence -= 1;
+                            }
+                        }
+                        Key::Up => {
+                            if note_duration < 8000 {
+                                note_duration += 50;
+                            }
+                        }
+                        Key::Down => {
+                            if note_duration > 0 {
+                                note_duration -= 50;
+                            }
+                        }
+                        Key::Esc => {
+                            break;
+                        }
+                        _ => {}
+                    }
                 }
-                match key {
-                    Key::Right => {
-                        if raw_sequence < 5 {
-                            raw_sequence += 1;
-                        }
-                    }
-                    Key::Left => {
-                        if raw_sequence > 0 {
-                            raw_sequence -= 1;
-                        }
-                    }
-                    Key::Up => {
-                        if note_duration < 8000 {
-                            note_duration += 50;
-                        }
-                    }
-                    Key::Down => {
-                        if note_duration > 0 {
-                            note_duration -= 50;
-                        }
-                    }
-                    Key::Esc => {
-                        break;
-                    }
-                    _ => {}
-                }
+                Err(e) => panic!("{}", e),
+                _ => {}
             }
-            Err(e) => panic!("{}", e),
-            _ => {}
         }
     }
 }
