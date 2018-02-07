@@ -220,6 +220,20 @@ fn main() {
         .author("Ritiek Malhotra <ritiekmalhotra123@gmail.com>")
         .about("Play piano in the terminal using PC keyboard.")
 
+        .arg(Arg::with_name("record")
+            .short("r")
+            .long("recordfile")
+            .value_name("FILEPATH")
+            .takes_value(true)
+            .help("Record notes to .yml file (Default: none)"))
+
+        .arg(Arg::with_name("play")
+            .short("p")
+            .long("playfile")
+            .value_name("FILEPATH")
+            .takes_value(true)
+            .help("Play notes from .yml file (Default: none)"))
+
         .arg(Arg::with_name("color")
             .short("c")
             .long("color")
@@ -273,7 +287,12 @@ fn main() {
     let mut now = time::Instant::now();
     let mut note_number = 1;
 
-    play_from_file("notes.yml", color, mark_duration, rb.clone());
+    if matches.is_present("play") {
+        let playfile = matches.value_of("play").unwrap();
+        play_from_file(playfile, color, mark_duration, rb.clone());
+    } /*else {
+        TODO: put below code into a function or something
+    }*/
 
     loop {
         let pe = rb.lock().unwrap().poll_event(false);
@@ -282,9 +301,12 @@ fn main() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 let note = notes::match_note(key, raw_sequence);
                 if note.position > 0 && note.position < 155 {
-                    player.write_note(&note.sound, note.sequence, note_duration,
-                                      note.position, note.white, "notes.yml",
-                                      now.elapsed(), note_number);
+                    if matches.is_present("record") {
+                        let record_file = matches.value_of("record").unwrap();
+                        player.write_note(&note.sound, note.sequence, note_duration,
+                                          note.position, note.white, record_file,
+                                          now.elapsed(), note_number);
+                    }
                     player.play(&note.sound, note.sequence, note_duration);
                     draw(note.position, note.white, color, mark_duration, rb);
                     note_number += 1;
