@@ -294,12 +294,11 @@ fn main() {
     let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
     rb.lock().unwrap().present();
 
-    if matches.is_present("play") {
-        let playfile = matches.value_of("play").unwrap();
-        play_from_file(playfile, replaycolor, mark_duration, rb.clone());
+    if let Some(playfile) = matches.value_of("play") {
+        play_from_file(playfile, replaycolor, mark_duration, rb);
     } else {
         let record_file = matches.value_of("record");
-        play_from_keyboard(rb.clone(), color, mark_duration,
+        play_from_keyboard(rb, color, mark_duration,
                            note_duration, raw_sequence, record_file);
     }
 }
