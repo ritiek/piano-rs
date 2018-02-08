@@ -6,6 +6,13 @@ pub fn get_arguments<'a>() -> ArgMatches<'a> {
         .author("Ritiek Malhotra <ritiekmalhotra123@gmail.com>")
         .about("Play piano in the terminal using PC (computer) keyboard.")
 
+        .arg(Arg::with_name("volume")
+            .short("v")
+            .long("volume")
+            .value_name("AMOUNT")
+            .takes_value(true)
+            .help("Set intial volume for notes (Default: 1.0)"))
+
         .arg(Arg::with_name("record")
             .short("r")
             .long("recordfile")
