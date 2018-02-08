@@ -186,9 +186,13 @@ fn draw(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<Ru
 }
 
 
-fn play_from_keyboard() {
-    let mut now = time::Instant::now();
+fn play_from_keyboard(rb: Arc<Mutex<RustBox>>, color: &str, mark_duration: u32,
+                      note_dur: u32, raw_seq: i16, record_file: Option<&str>) {
+    let mut note_duration = note_dur;
+    let mut raw_sequence = raw_seq;
+    let player = Player::new();
     let mut note_number = 1;
+    let mut now = time::Instant::now();
     loop {
         let pe = rb.lock().unwrap().poll_event(false);
         let rb = rb.clone();
@@ -196,10 +200,9 @@ fn play_from_keyboard() {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 let note = notes::match_note(key, raw_sequence);
                 if note.position > 0 && note.position < 155 {
-                    if matches.is_present("record") {
-                        let record_file = matches.value_of("record").unwrap();
+                    if let Some(r) = record_file {
                         player.write_note(&note.sound, note.sequence, note_duration,
-                                          note.position, note.white, record_file,
+                                          note.position, note.white, r,
                                           now.elapsed(), note_number);
                     }
                     player.play(&note.sound, note.sequence, note_duration);
@@ -282,12 +285,10 @@ fn main() {
         Result::Err(e) => panic!("{}", e),
     };
 
-    let player = Player::new();
-
     print_whitekeys(&rb);
     print_blackkeys(&rb);
-    let mut raw_sequence: i16 = matches.value_of("sequence").unwrap_or("2").parse().unwrap();
-    let mut note_duration: u32 = matches.value_of("noteduration").unwrap_or("0").parse().unwrap();
+    let raw_sequence: i16 = matches.value_of("sequence").unwrap_or("2").parse().unwrap();
+    let note_duration: u32 = matches.value_of("noteduration").unwrap_or("0").parse().unwrap();
     let mark_duration: u32 = matches.value_of("markduration").unwrap_or("500").parse().unwrap();
     let color = matches.value_of("color").unwrap_or("red");
     let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
@@ -297,7 +298,9 @@ fn main() {
         let playfile = matches.value_of("play").unwrap();
         play_from_file(playfile, replaycolor, mark_duration, rb.clone());
     } else {
-        play_from_keyboard();
+        let record_file = matches.value_of("record");
+        play_from_keyboard(rb.clone(), color, mark_duration,
+                           note_duration, raw_sequence, record_file);
     }
 }
 
