@@ -40,12 +40,14 @@ OPTIONS:
     -r, --recordfile <FILEPATH>       Record notes to .yml file (Default: none)
     -x, --replaycolor <COLOR>         Color of block to generate when notes are played from file (Default: "blue")
     -s, --sequence <SEQUENCE>         Frequency sequence from 0 to 5 to begin with (Default: 2)
+    -v, --volume <AMOUNT>             Set intial volume for notes (Default: 1.0)
 ```
 
 - Press keys on your PC keyboard to play the notes.
 - Adjust note frequency using <kbd>←</kbd> and <kbd>→</kbd>
   (or hold <kbd>ctrl</kbd> or <kbd>shift</kbd> respectively while playing).
 - Adjust note duration using <kbd>↑</kbd> and <kbd>↓</kbd>.
+- Adjust volume using <kbd>-</kbd> and <kbd>+</kbd>.
 - You can also record your notes with `-r <path/to/save/notes.yml>`
   and play them later on with `-p <path/to/save/notes.yml>`.
 
