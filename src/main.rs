@@ -119,6 +119,7 @@ fn print_whitekeys(rustbox: &Arc<Mutex<RustBox>>) {
             rustbox.lock().unwrap().print(k + 1, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
         }
     }
+    rustbox.lock().unwrap().present();
 }
 
 
@@ -141,6 +142,7 @@ fn print_blackkeys(rustbox: &Arc<Mutex<RustBox>>) {
             rustbox.lock().unwrap().print(g2k3, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
         }
     }
+    rustbox.lock().unwrap().present();
 }
 
 
@@ -188,14 +190,16 @@ fn draw(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<Ru
 }
 
 
-fn play_from_keyboard(rb: Arc<Mutex<RustBox>>, color: &str, mark_duration: u32,
+fn play_from_keyboard(rb: &Arc<Mutex<RustBox>>, color: &str, mark_duration: u32,
                       note_dur: u32, raw_seq: i16, volume: f32, record_file: Option<&str>) {
     let mut note_duration = note_dur;
     let mut raw_sequence = raw_seq;
     let player = Player::new();
+
     let mut note_number = 1;
     let mut note_volume = volume;
     let mut now = time::Instant::now();
+
     loop {
         let pe = rb.lock().unwrap().poll_event(false);
         let rb = rb.clone();
@@ -254,10 +258,11 @@ fn play_from_keyboard(rb: Arc<Mutex<RustBox>>, color: &str, mark_duration: u32,
 
 
 fn play_from_file(filename: &str, color: &str, mark_duration: u32,
-                  volume: f32, rustbox: Arc<Mutex<RustBox>>) {
+                  volume: f32, rustbox: &Arc<Mutex<RustBox>>) {
     let mut file = File::open(filename).expect("Unable to open the file");
     let mut s = String::new();
     file.read_to_string(&mut s).expect("Unable to read the file");
+
     let docs = YamlLoader::load_from_str(&s).unwrap();
     let doc = &docs[0];
     let mut note_num = 1;
@@ -266,10 +271,12 @@ fn play_from_file(filename: &str, color: &str, mark_duration: u32,
     loop {
         let rustbox = rustbox.clone();
         let note = format!("note_{}", note_num);
+
         let note_ops = match &doc[note.as_str()] {
             &Yaml::Array(ref x) => x,
             _ => break,
         };
+
         let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
         thread::sleep(duration);
         player.play(note_ops[0].as_str().unwrap(),
@@ -299,19 +306,18 @@ fn main() {
     print_blackkeys(&rb);
     let volume = value_t!(matches.value_of("volume"), f32).unwrap_or(1.0);
     let mark_duration = value_t!(matches.value_of("markduration"), u32).unwrap_or(500);
-    rb.lock().unwrap().present();
 
     if let Some(playfile) = matches.value_of("play") {
         let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
-        play_from_file(playfile, replaycolor, mark_duration, volume, rb);
-    } else {
-        let raw_sequence = value_t!(matches.value_of("sequence"), i16).unwrap_or(2);
-        let note_duration = value_t!(matches.value_of("noteduration"), u32).unwrap_or(0);
-        let record_file = matches.value_of("record");
-        let color = matches.value_of("color").unwrap_or("red");
-        play_from_keyboard(rb, color, mark_duration, note_duration,
-                           raw_sequence, volume, record_file);
+        play_from_file(playfile, replaycolor, mark_duration, volume, &rb);
     }
+
+    let raw_sequence = value_t!(matches.value_of("sequence"), i16).unwrap_or(2);
+    let note_duration = value_t!(matches.value_of("noteduration"), u32).unwrap_or(0);
+    let record_file = matches.value_of("record");
+    let color = matches.value_of("color").unwrap_or("red");
+    play_from_keyboard(&rb, color, mark_duration, note_duration,
+                       raw_sequence, volume, record_file);
 }
 
 
