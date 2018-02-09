@@ -1,5 +1,4 @@
 use rustbox::Key;
-
 use std::ascii::AsciiExt;
 
 
@@ -84,5 +83,29 @@ pub fn match_note(mut key: Key, mut raw_seq: i16) -> Note {
         sequence: sequence,
         position: position,
         white: white
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        Note,
+        match_note,
+        Key
+    };
+
+    #[test]
+    fn check_note_attributes() {
+        // check attributes for random note
+        let note = match_note(Key::Char('q'), 2);
+        let expect_note = Note {
+                              sound: "a".to_string(),
+                              sequence: 2,
+                              position: 64,
+                              white: true
+                           };
+
+        assert_eq!(note, expect_note);
     }
 }
