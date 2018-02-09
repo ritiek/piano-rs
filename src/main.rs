@@ -47,7 +47,6 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::{notes, Key};
     use std::path::Path;
 
     #[test]
@@ -74,19 +73,5 @@ mod tests {
 
         assert!(missing_notes.len() == 0,
                 "Some note sounds are missing: {}", missing_notes.join(", "));
-    }
-
-    #[test]
-    fn check_note_attributes() {
-        // check attributes for random note
-        let note = notes::match_note(Key::Char('q'), 2);
-        let expect_note = notes::Note {
-                                sound: "a".to_string(),
-                                sequence: 2,
-                                position: 64,
-                                white: true
-                           };
-
-        assert_eq!(note, expect_note);
     }
 }
