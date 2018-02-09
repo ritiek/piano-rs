@@ -1,5 +1,4 @@
 use rustbox::Key;
-
 use std::ascii::AsciiExt;
 
 

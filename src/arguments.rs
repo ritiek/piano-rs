@@ -1,5 +1,6 @@
 use clap::{Arg, App, ArgMatches};
 
+
 pub fn get_arguments<'a>() -> ArgMatches<'a> {
     App::new("piano-rs")
         .version("0.1.0")

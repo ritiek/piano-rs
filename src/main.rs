@@ -1,292 +1,17 @@
-mod arguments;
-mod notes;
-
 #[macro_use]
 extern crate clap;
 extern crate rodio;
 extern crate rustbox;
 extern crate yaml_rust;
 
+use rustbox::RustBox;
 use std::default::Default;
-use std::io::{BufReader, Read, Cursor};
 use std::sync::{Arc, Mutex};
-use std::{thread, time};
-use std::collections::HashMap;
-use std::fs::OpenOptions;
-use std::fs::File;
-use std::io::prelude::*;
 
-use yaml_rust::{YamlLoader, Yaml};
-
-use rustbox::{Color, RustBox};
-use rustbox::Key;
-
-/*
-█▒
-*/
-
-struct Player {
-    endpoint: rodio::Endpoint,
-    samples: HashMap<String, Vec<u8>>,
-}
-
-impl Player {
-    pub fn new() -> Player {
-        let endpoint = rodio::get_default_endpoint().unwrap();
-        let mut samples = HashMap::new();
-
-        for note in ["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"].iter() {
-            for sequence in -1..8_i16 {
-                Self::read_note(*note, sequence)
-                    .and_then(|sample| {
-                        samples.insert(format!("{}{}", note, sequence), sample);
-                        Some(())
-                    });
-            }
-        }
-
-        Player {
-            endpoint,
-            samples
-        }
-    }
-
-    fn get(&self, note: &str, sequence: i16) -> Option<BufReader<Cursor<Vec<u8>>>> {
-        self.samples.get(&format!("{}{}", note, sequence))
-            .map(|v| BufReader::new(Cursor::new(v.clone())))
-    }
-
-    fn play(&self, note: &str, sequence: i16, duration: u32, volume: f32) {
-        self.get(note, sequence)
-            .map(|note| {
-                let mut sink = rodio::play_once(&self.endpoint, note).expect("Cannot play");
-                sink.set_volume(volume);
-                if duration == 0 {
-                    sink.detach();
-                } else {
-                    thread::spawn(move || {
-                        let delay = time::Duration::from_millis(duration.into());
-                        thread::sleep(delay);
-                        sink.stop();
-                    });
-                }
-
-                true
-            });
-    }
-
-    fn read_note(note: &str, sequence: i16) -> Option<Vec<u8>> {
-        let file_path = format!("assets/{0}{1}.ogg", note, sequence);
-        std::fs::File::open(file_path)
-            .map(|mut file| {
-                let mut data = Vec::new();
-                file.read_to_end(&mut data).unwrap();
-                data
-            }).ok()
-    }
-
-    fn write_note(&self, note: &str, sequence: i16, duration: u32, position: i16, white: bool,
-                  file_path: &str, time_diff: time::Duration, n: u32) {
-        let diff_in_ms = Self::get_ms(time_diff);
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .append(true)
-            .open(file_path)
-            .unwrap();
-        let note_details = format!("note_{}:\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n",
-                                   n, note, sequence, duration, diff_in_ms, position, white);
-
-        if let Err(e) = writeln!(file, "{}", note_details) {
-            eprintln!("Couldn't write to file: {}", e);
-        }
-    }
-
-    fn get_ms(time_diff: time::Duration) -> u64 {
-        let nanos = time_diff.subsec_nanos() as u64;
-		(1000*1000*1000 * time_diff.as_secs() + nanos)/(1000 * 1000)
-    }
-}
-
-
-fn print_whitekeys(rustbox: &Arc<Mutex<RustBox>>) {
-    for y in 0..16 {
-        // last border is lonely
-        rustbox.lock().unwrap().print(156, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
-        for x in 0..52 {
-            let k = x * 3;
-            rustbox.lock().unwrap().print(k, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
-            rustbox.lock().unwrap().print(k + 1, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
-        }
-    }
-    rustbox.lock().unwrap().present();
-}
-
-
-fn print_blackkeys(rustbox: &Arc<Mutex<RustBox>>) {
-    for y in 0..9 {
-        // first black key is lonely
-        rustbox.lock().unwrap().print(3, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
-
-        for x in 0..7 {
-            let g1k1 = x * 21 + 9;
-            let g1k2 = g1k1 + 3;
-            rustbox.lock().unwrap().print(g1k1, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
-            rustbox.lock().unwrap().print(g1k2, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
-
-            let g2k1 = g1k2 + 6;
-            let g2k2 = g2k1 + 3;
-            let g2k3 = g2k2 + 3;
-            rustbox.lock().unwrap().print(g2k1, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
-            rustbox.lock().unwrap().print(g2k2, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
-            rustbox.lock().unwrap().print(g2k3, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
-        }
-    }
-    rustbox.lock().unwrap().present();
-}
-
-
-fn draw(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<RustBox>>) {
-    let rb_colors = [
-        Color::Black,
-        Color::Red,
-        Color::Green,
-        Color::Yellow,
-        Color::Blue,
-        Color::Magenta,
-        Color::Cyan,
-        Color::White
-    ];
-
-    let colors = [
-        "black",
-        "red",
-        "green",
-        "yellow",
-        "blue",
-        "magenta",
-        "cyan",
-        "white"
-    ];
-
-    let color_pos = colors.iter().position(|&c| c == color).unwrap();
-
-    if white {
-        rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒▒");
-    } else {
-        rustbox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒");
-    }
-
-    rustbox.lock().unwrap().present();
-    thread::spawn(move || {
-        let delay = time::Duration::from_millis(duration.into());
-        thread::sleep(delay);
-        if white {
-            rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, Color::White, Color::White, "▒▒");
-        } else {
-            rustbox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, Color::Black, Color::White, "▒");
-        }
-    });
-}
-
-
-fn play_from_keyboard(rb: &Arc<Mutex<RustBox>>, color: &str, mark_duration: u32,
-                      note_dur: u32, raw_seq: i16, volume: f32, record_file: Option<&str>) {
-    let mut note_duration = note_dur;
-    let mut raw_sequence = raw_seq;
-    let player = Player::new();
-
-    let mut note_number = 1;
-    let mut note_volume = volume;
-    let mut now = time::Instant::now();
-
-    loop {
-        let pe = rb.lock().unwrap().poll_event(false);
-        let rb = rb.clone();
-        match pe {
-            Ok(rustbox::Event::KeyEvent(key)) => {
-                let note = notes::match_note(key, raw_sequence);
-                if note.position > 0 && note.position < 155 {
-                    if let Some(r) = record_file {
-                        player.write_note(&note.sound, note.sequence, note_duration,
-                                          note.position, note.white, r,
-                                          now.elapsed(), note_number);
-                    }
-                    player.play(&note.sound, note.sequence, note_duration, note_volume);
-                    draw(note.position, note.white, color, mark_duration, rb);
-                    note_number += 1;
-                    now = time::Instant::now();
-                }
-                match key {
-                    Key::Right => {
-                        if raw_sequence < 5 {
-                            raw_sequence += 1;
-                        }
-                    }
-                    Key::Left => {
-                        if raw_sequence > 0 {
-                            raw_sequence -= 1;
-                        }
-                    }
-                    Key::Up => {
-                        if note_duration < 8000 {
-                            note_duration += 50;
-                        }
-                    }
-                    Key::Down => {
-                        if note_duration > 0 {
-                            note_duration -= 50;
-                        }
-                    }
-                    Key::Char('+') => {
-                        note_volume += 0.1;
-                    }
-                    Key::Char('-') => {
-                        note_volume -= 0.1;
-                    }
-                    Key::Esc => {
-                        break;
-                    }
-                    _ => {}
-                }
-            }
-            Err(e) => panic!("{}", e),
-            _ => {}
-        }
-    }
-}
-
-
-fn play_from_file(filename: &str, color: &str, mark_duration: u32,
-                  volume: f32, rustbox: &Arc<Mutex<RustBox>>) {
-    let mut file = File::open(filename).expect("Unable to open the file");
-    let mut s = String::new();
-    file.read_to_string(&mut s).expect("Unable to read the file");
-
-    let docs = YamlLoader::load_from_str(&s).unwrap();
-    let doc = &docs[0];
-    let mut note_num = 1;
-    let player = Player::new();
-
-    loop {
-        let rustbox = rustbox.clone();
-        let note = format!("note_{}", note_num);
-
-        let note_ops = match &doc[note.as_str()] {
-            &Yaml::Array(ref x) => x,
-            _ => break,
-        };
-
-        let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
-        thread::sleep(duration);
-        player.play(note_ops[0].as_str().unwrap(),
-                    note_ops[1].as_i64().unwrap() as i16,
-                    note_ops[2].as_i64().unwrap() as u32,
-                    volume);
-        draw(note_ops[4].as_i64().unwrap() as i16, note_ops[5].as_bool().unwrap(), color, mark_duration, rustbox);
-        note_num += 1;
-    }
-}
+mod arguments;
+mod notes;
+mod play;
+mod output;
 
 
 fn main() {
@@ -302,21 +27,20 @@ fn main() {
         Result::Err(e) => panic!("{}", e),
     };
 
-    print_whitekeys(&rb);
-    print_blackkeys(&rb);
+    output::display_keyboard(&rb);
     let volume = value_t!(matches.value_of("volume"), f32).unwrap_or(1.0);
     let mark_duration = value_t!(matches.value_of("markduration"), u32).unwrap_or(500);
 
     if let Some(playfile) = matches.value_of("play") {
         let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
-        play_from_file(playfile, replaycolor, mark_duration, volume, &rb);
+        play::play_from_file(playfile, replaycolor, mark_duration, volume, &rb);
     }
 
     let raw_sequence = value_t!(matches.value_of("sequence"), i16).unwrap_or(2);
     let note_duration = value_t!(matches.value_of("noteduration"), u32).unwrap_or(0);
     let record_file = matches.value_of("record");
     let color = matches.value_of("color").unwrap_or("red");
-    play_from_keyboard(&rb, color, mark_duration, note_duration,
+    play::play_from_keyboard(&rb, color, mark_duration, note_duration,
                        raw_sequence, volume, record_file);
 }
 
