@@ -40,6 +40,7 @@ OPTIONS:
     -r, --recordfile <FILEPATH>       Record notes to .yml file (Default: none)
     -x, --replaycolor <COLOR>         Color of block to generate when notes are played from file (Default: "blue")
     -s, --sequence <SEQUENCE>         Frequency sequence from 0 to 5 to begin with (Default: 2)
+    -t, --playback-tempo <AMOUNT>     Set playback speed when playing from file (Default: 1.0)
     -v, --volume <AMOUNT>             Set intial volume for notes (Default: 1.0)
 ```
 
