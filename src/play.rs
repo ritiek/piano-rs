@@ -101,7 +101,7 @@ impl Player {
 
 
 pub fn play_from_keyboard(rb: &Arc<Mutex<RustBox>>, color: &str, mark_duration: u32,
-                      note_dur: u32, raw_seq: i16, volume: f32, record_file: Option<&str>) {
+                          note_dur: u32, raw_seq: i16, volume: f32, record_file: Option<&str>) {
     let mut note_duration = note_dur;
     let mut raw_sequence = raw_seq;
     let player = Player::new();
@@ -168,7 +168,7 @@ pub fn play_from_keyboard(rb: &Arc<Mutex<RustBox>>, color: &str, mark_duration: 
 
 
 pub fn play_from_file(filename: &str, color: &str, mark_duration: u32,
-                  volume: f32, rustbox: &Arc<Mutex<RustBox>>) {
+                      volume: f32, tempo: f32, rustbox: &Arc<Mutex<RustBox>>) {
     let mut file = File::open(filename).expect("Unable to open the file");
     let mut s = String::new();
     file.read_to_string(&mut s).expect("Unable to read the file");
@@ -187,7 +187,7 @@ pub fn play_from_file(filename: &str, color: &str, mark_duration: u32,
             _ => break,
         };
 
-        let duration = time::Duration::from_millis(note_ops[3].as_i64().unwrap() as u64);
+        let duration = time::Duration::from_millis((note_ops[3].as_i64().unwrap() as f32 / tempo) as u64);
         thread::sleep(duration);
         player.play(note_ops[0].as_str().unwrap(),
                     note_ops[1].as_i64().unwrap() as i16,
