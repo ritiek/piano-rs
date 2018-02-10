@@ -33,7 +33,9 @@ fn main() {
 
     if let Some(playfile) = matches.value_of("play") {
         let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
-        play::play_from_file(playfile, replaycolor, mark_duration, volume, &rb);
+        let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0);
+        play::play_from_file(playfile, replaycolor,
+                             mark_duration, volume, tempo, &rb);
     }
 
     let raw_sequence = value_t!(matches.value_of("sequence"), i16).unwrap_or(2);
@@ -41,7 +43,7 @@ fn main() {
     let record_file = matches.value_of("record");
     let color = matches.value_of("color").unwrap_or("red");
     play::play_from_keyboard(&rb, color, mark_duration, note_duration,
-                       raw_sequence, volume, record_file);
+                             raw_sequence, volume, record_file);
 }
 
 
