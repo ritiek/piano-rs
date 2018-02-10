@@ -26,7 +26,7 @@ impl Player {
         let endpoint = rodio::get_default_endpoint().unwrap();
         let mut samples = HashMap::new();
 
-        for note in ["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"].iter() {
+        for note in &["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"] {
             for sequence in -1..8_i16 {
                 Self::read_note(*note, sequence)
                     .and_then(|sample| {
@@ -76,7 +76,7 @@ impl Player {
             }).ok()
     }
 
-    fn write_note(&self, note: &str, sequence: i16, duration: u32, position: i16, white: bool,
+    fn write_note(&self, note: &notes::Note, duration: u32,
                   file_path: &str, time_diff: time::Duration, n: u32) {
         let diff_in_ms = Self::get_ms(time_diff);
         let mut file = OpenOptions::new()
@@ -86,7 +86,7 @@ impl Player {
             .open(file_path)
             .unwrap();
         let note_details = format!("note_{}:\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n",
-                                   n, note, sequence, duration, diff_in_ms, position, white);
+                                   n, note.sound, note.sequence, duration, diff_in_ms, note.position, note.white);
 
         if let Err(e) = writeln!(file, "{}", note_details) {
             eprintln!("Couldn't write to file: {}", e);
@@ -94,7 +94,7 @@ impl Player {
     }
 
     fn get_ms(time_diff: time::Duration) -> u64 {
-        let nanos = time_diff.subsec_nanos() as u64;
+        let nanos = u64::from(time_diff.subsec_nanos());
 		(1000*1000*1000 * time_diff.as_secs() + nanos)/(1000 * 1000)
     }
 }
@@ -118,9 +118,7 @@ pub fn play_from_keyboard(rb: &Arc<Mutex<RustBox>>, color: &str, mark_duration: 
                 let note = notes::match_note(key, raw_sequence);
                 if note.position > 0 && note.position < 155 {
                     if let Some(r) = record_file {
-                        player.write_note(&note.sound, note.sequence, note_duration,
-                                          note.position, note.white, r,
-                                          now.elapsed(), note_number);
+                        player.write_note(&note, note_duration, r, now.elapsed(), note_number);
                     }
                     player.play(&note.sound, note.sequence, note_duration, note_volume);
                     draw(note.position, note.white, color, mark_duration, rb);
@@ -182,8 +180,8 @@ pub fn play_from_file(filename: &str, color: &str, mark_duration: u32,
         let rustbox = rustbox.clone();
         let note = format!("note_{}", note_num);
 
-        let note_ops = match &doc[note.as_str()] {
-            &Yaml::Array(ref x) => x,
+        let note_ops = &match doc[note.as_str()] {
+            Yaml::Array(ref x) => x,
             _ => break,
         };
 
