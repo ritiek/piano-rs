@@ -52,6 +52,14 @@ OPTIONS:
 - You can also record your notes with `-r <path/to/save/notes.yml>`
   and play them later on with `-p <path/to/save/notes.yml>`.
 
+If you're using Ubuntu, you might face the following:
+
+    error: failed to run custom build command for `alsa-sys v0.1.1`
+
+In this case, installing `libasound2-dev` should solve the problem:
+
+    $ sudo apt-get install libasound2-dev
+
 ## Running tests
 
 ```
