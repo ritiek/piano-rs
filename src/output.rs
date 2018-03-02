@@ -10,7 +10,7 @@ use std::{thread, time};
 
 fn print_whitekeys(rustbox: &Arc<Mutex<RustBox>>) {
     for y in 0..16 {
-        // last border is lonely
+        // Last border is lonely
         rustbox.lock().unwrap().print(156, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
         for x in 0..52 {
             let k = x * 3;
@@ -23,7 +23,7 @@ fn print_whitekeys(rustbox: &Arc<Mutex<RustBox>>) {
 
 fn print_blackkeys(rustbox: &Arc<Mutex<RustBox>>) {
     for y in 0..9 {
-        // first black key is lonely
+        // First black key is lonely
         rustbox.lock().unwrap().print(3, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
 
         for x in 0..7 {

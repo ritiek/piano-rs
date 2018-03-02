@@ -11,7 +11,7 @@ pub struct Note {
 }
 
 pub fn match_note(mut key: Key, mut raw_seq: i16) -> Note {
-    //TODO: return smthn instinctive instead of fake data if key not matched
+    //TODO: Return smthn instinctive instead of fake data if key not matched
     let mut sound = String::new();
     let mut white = true;
     let mut factor = -1;
@@ -49,12 +49,22 @@ pub fn match_note(mut key: Key, mut raw_seq: i16) -> Note {
                            '.', '/', '[', ']'];
 
 
+    // Handle terminal control characters
+    if key == Key::Enter {
+        // Ctrl+m sends Enter in terminal
+        key = Key::Ctrl('m');
+    } else if key == Key::Tab {
+        // Ctrl+i sends Tab in terminal
+        key = Key::Ctrl('i');
+    }
+
+    // Translate Ctrl+<character> to <character>
     if let Key::Ctrl(c) = key {
         key = Key::Char(c);
         raw_seq -= 1;
     }
 
-    // increment `raw_seq` if key was shift prefixed
+    // Increment `raw_seq` if key was shift prefixed (Shift+<character>)
     if let Key::Char(mut c) = key {
         if c.is_uppercase() {
             c = c.to_ascii_lowercase();
@@ -97,7 +107,7 @@ mod tests {
 
     #[test]
     fn check_note_attributes() {
-        // check attributes for random note
+        // Check attributes for random note
         let note = match_note(Key::Char('q'), 2);
         let expect_note = Note {
                               sound: "a".to_string(),

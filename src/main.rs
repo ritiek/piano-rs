@@ -53,7 +53,7 @@ mod tests {
 
     #[test]
     fn check_missing_notes() {
-        // find missing notes in assets/*.ogg, if any
+        // Find missing notes in assets/*.ogg, if any
         let mut missing_notes = Vec::new();
         let expected_notes = ["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"];
         for expected_note in expected_notes.iter() {
