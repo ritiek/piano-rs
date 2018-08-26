@@ -11,10 +11,10 @@ Play piano in the terminal using PC (computer) keyboard.
 
 ## Compiling
 
-Make sure `python` command is pointing to **python 2** but not python 3, [otherwise compilation may fail.](https://github.com/ritiek/piano-rs/issues/27)
+Make sure `python` command is **not** pointing to **python 3.7**, [otherwise the dependency `termbox` may fail to compile.](https://github.com/ritiek/piano-rs/issues/27)
 ```
 $ python -V
-Python 2.x
+# Python 2.x, 3.6, 3.5 are all fine, as long as it's not 3.7
 ```
 Then compile!
 ```
