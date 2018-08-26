@@ -11,6 +11,12 @@ Play piano in the terminal using PC (computer) keyboard.
 
 ## Compiling
 
+Make sure `python` command is **not** pointing to **python 3.7**, [otherwise the dependency `termbox` may fail to compile.](https://github.com/ritiek/piano-rs/issues/27)
+```
+$ python -V
+# Python 2.x, 3.6, 3.5 are all fine, as long as it's not 3.7
+```
+Then compile!
 ```
 $ git clone https://github.com/ritiek/piano-rs
 $ cd piano-rs
@@ -59,6 +65,8 @@ If you're using Ubuntu, you might face the following:
 In this case, installing `libasound2-dev` should solve the problem:
 
     $ sudo apt-get install libasound2-dev
+
+If you get no sound when you press keys, [try running it in a directory containing asset folder](https://github.com/ritiek/piano-rs/issues/6#issuecomment-354971861), for example the project directory.
 
 ## Running tests
 
