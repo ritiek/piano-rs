@@ -22,6 +22,15 @@ $ git clone https://github.com/ritiek/piano-rs
 $ cd piano-rs
 $ cargo build --release
 ```
+
+If you're using Ubuntu, you might face the following:
+
+    error: failed to run custom build command for `alsa-sys v0.1.1`
+
+In this case, installing `libasound2-dev` should solve the problem:
+
+    $ sudo apt-get install libasound2-dev
+
 ## Usage
 
 Once it compiles, run the binary in `./target/release/piano-rs`:
@@ -57,14 +66,6 @@ OPTIONS:
 - Adjust volume using <kbd>-</kbd> and <kbd>+</kbd>.
 - You can also record your notes with `-r <path/to/save/notes.yml>`
   and play them later on with `-p <path/to/save/notes.yml>`.
-
-If you're using Ubuntu, you might face the following:
-
-    error: failed to run custom build command for `alsa-sys v0.1.1`
-
-In this case, installing `libasound2-dev` should solve the problem:
-
-    $ sudo apt-get install libasound2-dev
 
 If you get no sound when you press keys, [try running it in a directory containing asset folder](https://github.com/ritiek/piano-rs/issues/6#issuecomment-354971861), for example the project directory.
 
