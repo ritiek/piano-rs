@@ -7,6 +7,7 @@ extern crate yaml_rust;
 use rustbox::RustBox;
 use std::default::Default;
 use std::sync::{Arc, Mutex};
+use std::{thread, time};
 
 mod arguments;
 mod notes;
@@ -42,6 +43,8 @@ fn main() {
     let note_duration = value_t!(matches.value_of("noteduration"), u32).unwrap_or(0);
     let record_file = matches.value_of("record");
     let color = matches.value_of("color").unwrap_or("red");
+    let delay = time::Duration::from_millis(10000);
+    thread::sleep(delay);
     play::play_from_keyboard(&rb, color, mark_duration, note_duration,
                              raw_sequence, volume, record_file);
 }

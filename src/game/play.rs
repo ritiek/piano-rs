@@ -112,6 +112,8 @@ pub fn play_from_keyboard(rb: &Arc<Mutex<RustBox>>, color: &str, mark_duration: 
 
     loop {
         let pe = rb.lock().unwrap().poll_event(false);
+        /* let delay = time::Duration::from_millis(1000); */
+        /* thread::sleep(1000); */
         let rb = rb.clone();
         match pe {
             Ok(rustbox::Event::KeyEvent(key)) => {
