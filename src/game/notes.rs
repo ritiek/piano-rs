@@ -10,7 +10,7 @@ pub struct Note {
     pub white: bool,
 }
 
-pub fn match_note(mut key: Key, mut raw_seq: i16) -> Note {
+pub fn match_note(mut key: Key, mut raw_seq: i16) -> Option<Note> {
     //TODO: Return smthn instinctive instead of fake data if key not matched
     let mut sound = String::new();
     let mut white = true;

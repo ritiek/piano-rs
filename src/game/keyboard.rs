@@ -1,8 +1,7 @@
-extern crate rustbox;
-
 use rustbox::{Color, RustBox};
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
+use crate::game::notes::Note;
 
 struct PianoKeyboard {
 }
@@ -12,7 +11,7 @@ impl PianoKeyboard {
         PianoKeyboard { }
     }
 
-    pub fn draw(self) {
+    pub fn draw(self, rustbox: &Arc<Mutex<RustBox>>) {
         self.print_whitekeys(rustbox);
         self.print_blackkeys(rustbox);
     }

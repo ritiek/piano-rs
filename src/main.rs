@@ -1,18 +1,12 @@
-#[macro_use]
-extern crate clap;
-extern crate rodio;
-extern crate rustbox;
-extern crate yaml_rust;
-
 use rustbox::RustBox;
 use std::default::Default;
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
 
-mod arguments;
-mod notes;
-mod play;
-mod output;
+mod crate::arguments;
+mod crate::game::notes;
+mod crate::game::play;
+mod crate::game::output;
 
 
 fn main() {

@@ -1,11 +1,7 @@
-extern crate rodio;
-extern crate std;
-extern crate rustbox;
-
 use yaml_rust::{YamlLoader, Yaml};
 use rustbox::{RustBox, Key};
-use output::draw;
-use notes;
+use crate::game::output;
+use crate::game::notes;
 
 use std::io::{BufReader, Read, Cursor};
 use std::sync::{Arc, Mutex};
@@ -123,7 +119,7 @@ pub fn play_from_keyboard(rb: &Arc<Mutex<RustBox>>, color: &str, mark_duration: 
                         player.write_note(&note, note_duration, r, now.elapsed(), note_number);
                     }
                     player.play(&note.sound, note.sequence, note_duration, note_volume);
-                    draw(note.position, note.white, color, mark_duration, rb);
+                    output::draw(note.position, note.white, color, mark_duration, rb);
                     note_number += 1;
                     now = time::Instant::now();
                 }
