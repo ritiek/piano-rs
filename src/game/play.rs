@@ -114,7 +114,7 @@ pub fn play_from_keyboard(rb: &Arc<Mutex<RustBox>>, color: &str, mark_duration: 
         match pe {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 let note = notes::match_note(key, raw_sequence);
-                if note.position > 0 && note.position < 155 {
+                if let Some(note) = note {
                     if let Some(r) = record_file {
                         player.write_note(&note, note_duration, r, now.elapsed(), note_number);
                     }
@@ -189,7 +189,7 @@ pub fn play_from_file(filename: &str, color: &str, mark_duration: u32,
                     note_ops[1].as_i64().unwrap() as i16,
                     note_ops[2].as_i64().unwrap() as u32,
                     volume);
-        draw(note_ops[4].as_i64().unwrap() as i16, note_ops[5].as_bool().unwrap(), color, mark_duration, rustbox);
+        output::draw(note_ops[4].as_i64().unwrap() as i16, note_ops[5].as_bool().unwrap(), color, mark_duration, rustbox);
         note_num += 1;
     }
 }

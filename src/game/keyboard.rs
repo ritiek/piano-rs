@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use std::{thread, time};
 use crate::game::notes::Note;
 
+#[derive(Debug, Copy, Clone)]
 struct PianoKeyboard {
 }
 
@@ -76,24 +77,24 @@ impl PianoKeyboard {
 
         let color_pos = colors.iter().position(|&c| c == color).unwrap();
 
-        if white {
-            rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒▒");
+        if note.white {
+            rustbox.lock().unwrap().print(note.position as usize, 15, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒▒");
         } else {
-            rustbox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒");
+            rustbox.lock().unwrap().print(note.position as usize, 8, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒");
         }
 
         rustbox.lock().unwrap().present();
         thread::spawn(move || {
             let delay = time::Duration::from_millis(duration.into());
             thread::sleep(delay);
-            if white {
-                rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, Color::White, Color::White, "▒▒");
+            if note.white {
+                rustbox.lock().unwrap().print(note.position as usize, 15, rustbox::RB_BOLD, Color::White, Color::White, "▒▒");
             } else {
-                rustbox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, Color::Black, Color::White, "▒");
+                rustbox.lock().unwrap().print(note.position as usize, 8, rustbox::RB_BOLD, Color::Black, Color::White, "▒");
             }
         });
     }
-    
+
     pub fn play_from_file(self, ) {
     }
 }

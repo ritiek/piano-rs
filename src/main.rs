@@ -1,12 +1,13 @@
 use rustbox::RustBox;
+use clap::value_t;
 use std::default::Default;
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
 
-mod crate::arguments;
-mod crate::game::notes;
-mod crate::game::play;
-mod crate::game::output;
+use piano_rs::arguments;
+use piano_rs::game::notes;
+use piano_rs::game::play;
+use piano_rs::game::output;
 
 
 fn main() {

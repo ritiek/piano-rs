@@ -13,9 +13,10 @@ pub struct Note {
 pub fn match_note(mut key: Key, mut raw_seq: i16) -> Option<Note> {
     //TODO: Return smthn instinctive instead of fake data if key not matched
     let mut sound = String::new();
-    let mut white = true;
-    let mut factor = -1;
-    let mut init_pos = -106;
+    let mut white: bool;
+    let mut factor: i16;
+    let mut position: i16;
+    let mut sequence: i16;
 
     let keys = ['z', 's', 'x', 'c', 'f', 'v', 'g', 'b', 'n',
                 'j', 'm', 'k', '1', ',', 'q', 'l', '2', '.',
@@ -65,7 +66,7 @@ pub fn match_note(mut key: Key, mut raw_seq: i16) -> Option<Note> {
     }
 
     // Increment `raw_seq` if key was shift prefixed (Shift+<character>)
-    if let Key::Char(mut c) = key {
+    let note: Option<Note> = if let Key::Char(mut c) = key {
         if c.is_uppercase() {
             c = c.to_ascii_lowercase();
             raw_seq += 1;
@@ -78,22 +79,23 @@ pub fn match_note(mut key: Key, mut raw_seq: i16) -> Option<Note> {
         }
 
         if let Some(i) = keys.iter().position(|&key| key == c) {
-            sound = notes[i].to_string();
-            init_pos = init_poses[i];
-            white = whites[i];
-            factor = factors[i];
+            let init_pos = init_poses[i];
+            let factor = factors[i];
+
+            Some(Note {
+                sound: notes[i].to_string(),
+                sequence: raw_seq + factor,
+                position: init_pos + 21 * raw_seq,
+                white: whites[i],
+            })
+        } else {
+            None
         }
-    }
+    } else {
+        None
+    };
 
-    let position = init_pos + 21 * raw_seq;
-    let sequence = raw_seq + factor;
-
-    Note {
-        sound: sound,
-        sequence: sequence,
-        position: position,
-        white: white
-    }
+    note
 }
 
 
