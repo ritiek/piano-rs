@@ -5,9 +5,10 @@ use std::sync::{Arc, Mutex};
 use std::{thread, time};
 
 use piano_rs::arguments;
-use piano_rs::game::notes;
-use piano_rs::game::play;
-use piano_rs::game::output;
+use piano_rs::game::Note;
+/* use piano_rs::game::play; */
+/* use piano_rs::game::output; */
+use piano_rs::game::PianoKeyboard;
 
 
 fn main() {
@@ -23,25 +24,34 @@ fn main() {
         Result::Err(e) => panic!("{}", e),
     };
 
-    output::display_keyboard(&rb);
+    /* output::display_keyboard(&rb); */
     let volume = value_t!(matches.value_of("volume"), f32).unwrap_or(1.0);
     let mark_duration = value_t!(matches.value_of("markduration"), u32).unwrap_or(500);
 
     if let Some(playfile) = matches.value_of("play") {
         let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
         let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0);
-        play::play_from_file(playfile, replaycolor,
-                             mark_duration, volume, tempo, &rb);
+        /* play::play_from_file(playfile, replaycolor, */
+                             /* mark_duration, volume, tempo, &rb); */
     }
 
     let raw_sequence = value_t!(matches.value_of("sequence"), i16).unwrap_or(2);
     let note_duration = value_t!(matches.value_of("noteduration"), u32).unwrap_or(0);
     let record_file = matches.value_of("record");
     let color = matches.value_of("color").unwrap_or("red");
+    /* play::play_from_keyboard(&rb, color, mark_duration, note_duration, */
+    /*                          raw_sequence, volume, record_file); */
+
+    let keyboard = PianoKeyboard::new();
+    keyboard.draw(&rb);
+    match Note::from("b3") {
+        Some(v) => {
+            keyboard.play_note(v, "red", 2000, rb);
+        },
+        None => { },
+    }
     let delay = time::Duration::from_millis(10000);
     thread::sleep(delay);
-    play::play_from_keyboard(&rb, color, mark_duration, note_duration,
-                             raw_sequence, volume, record_file);
 }
 
 

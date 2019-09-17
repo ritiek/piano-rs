@@ -11,6 +11,9 @@ categories = ["multimedia::audio", "command-line-utilities"]
 license = "MIT"
 
 [dependencies]
+bincode = "1.1"
+serde_derive = "1.0"
+serde = "1.0"
 clap = "2.27"
 rodio = "0.5"
 rustbox = "0.11"

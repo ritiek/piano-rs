@@ -1,22 +1,67 @@
-use rustbox::Key;
 use std::ascii::AsciiExt;
+use std::num::ParseIntError;
+use std::convert::Infallible;
+use rodio::Endpoint;
+use serde_derive::{Serialize, Deserialize};
+use rustbox::Key;
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Note {
     pub sound: String,
-    pub sequence: i16,
-    pub position: i16,
+    base: String,
+    frequency: i8,
+    pub position: i8,
     pub white: bool,
 }
 
-pub fn match_note(mut key: Key, mut raw_seq: i16) -> Option<Note> {
-    //TODO: Return smthn instinctive instead of fake data if key not matched
+/* #[derive(Debug, PartialEq, Serialize, Deserialize)] */
+/* pub struct Note { */
+/*     pub sound: String, */
+/*     pub frequency: i8, */
+/* } */
+
+impl Note {
+    pub fn from(sound: &str) -> Option<Note> {
+        let (base_sound, frequency) = Self::extract_base_sound_and_frequency(sound);
+        /* let position = Self::position(); */
+        match frequency {
+            Ok(v) => {
+                Some(Note {
+                    sound: sound.to_string(),
+                    base: base_sound.unwrap(),
+                    frequency: v,
+                    position: 10,
+                    white: true,
+                })
+            },
+            Err(e) => None,
+        }
+    }
+
+    fn extract_base_sound_and_frequency(note: &str) -> (Result<String, Infallible>, Result<i8, ParseIntError>) {
+        let mut frequency: Result<i8, ParseIntError> = note.parse();
+        let mut base_sound: Result<String, Infallible> = note.parse();
+        for start_index in 1..note.len() {
+            frequency = note[start_index..].parse();
+            base_sound = note[..start_index].parse();
+            if let Ok(v) = frequency {
+                break;
+            }
+        }
+        (base_sound, frequency)
+    }
+
+    pub fn play(endponit: Endpoint) {
+    }
+}
+
+pub fn match_note(mut key: Key, mut raw_seq: i8) -> Option<Note> {
     let mut sound = String::new();
     let mut white: bool;
-    let mut factor: i16;
-    let mut position: i16;
-    let mut sequence: i16;
+    let mut factor: i8;
+    let mut position: i8;
+    let mut frequency: i8;
 
     let keys = ['z', 's', 'x', 'c', 'f', 'v', 'g', 'b', 'n',
                 'j', 'm', 'k', '1', ',', 'q', 'l', '2', '.',
@@ -82,12 +127,16 @@ pub fn match_note(mut key: Key, mut raw_seq: i16) -> Option<Note> {
             let init_pos = init_poses[i];
             let factor = factors[i];
 
-            Some(Note {
-                sound: notes[i].to_string(),
-                sequence: raw_seq + factor,
-                position: init_pos + 21 * raw_seq,
-                white: whites[i],
-            })
+            let note_sound = format!("{}{}", notes[i].to_string(), raw_seq + factor);
+
+            Note::from(&note_sound)
+            /* Some(Note { */
+            /*     sound: note_sound, */
+            /*     /1* base: notes[i].to_string(), *1/ */
+            /*     /1* frequency: raw_seq + factor, *1/ */
+            /*     position: init_pos + 21 * raw_seq, */
+            /*     white: whites[i], */
+            /* }) */
         } else {
             None
         }
@@ -112,8 +161,8 @@ mod tests {
         // Check attributes for random note
         let note = match_note(Key::Char('q'), 2);
         let expect_note = Note {
-                              sound: "a".to_string(),
-                              sequence: 2,
+                              base: "a".to_string(),
+                              frequency: 2,
                               position: 64,
                               white: true
                            };
