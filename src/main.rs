@@ -1,4 +1,4 @@
-use rustbox::RustBox;
+use rustbox::{Color, RustBox};
 use clap::value_t;
 use std::default::Default;
 use std::sync::{Arc, Mutex};
@@ -46,7 +46,7 @@ fn main() {
     keyboard.draw(&rb);
     match Note::from("b3") {
         Some(v) => {
-            keyboard.play_note(v, "red", 2000, rb);
+            keyboard.play_note(v, Color::Green, 2000, rb);
         },
         None => { },
     }
