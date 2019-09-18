@@ -26,36 +26,6 @@ impl PianoKeyboard {
     }
 
     pub fn play_note(self, note: Note, color: Color, duration: u32, rustbox: Arc<Mutex<RustBox>>) {
-        /* let rb_colors = [ */
-        /*     Color::Black, */
-        /*     Color::Red, */
-        /*     Color::Green, */
-        /*     Color::Yellow, */
-        /*     Color::Blue, */
-        /*     Color::Magenta, */
-        /*     Color::Cyan, */
-        /*     Color::White */
-        /* ]; */
-
-        /* let colors = [ */
-        /*     "black", */
-        /*     "red", */
-        /*     "green", */
-        /*     "yellow", */
-        /*     "blue", */
-        /*     "magenta", */
-        /*     "cyan", */
-        /*     "white" */
-        /* ]; */
-
-        /* let color_pos = colors.iter().position(|&c| c == color).unwrap(); */
-
-        /* if note.white { */
-        /*     rustbox.lock().unwrap().print(note.position as usize, 15, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒▒"); */
-        /* } else { */
-        /*     rustbox.lock().unwrap().print(note.position as usize, 8, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒"); */
-        /* } */
-
         if note.white {
             rustbox.lock().unwrap().print(note.position as usize, 15, rustbox::RB_BOLD, color, Color::White, "▒▒");
         } else {

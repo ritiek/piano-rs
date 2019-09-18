@@ -44,7 +44,7 @@ fn main() {
 
     let keyboard = PianoKeyboard::new();
     keyboard.draw(&rb);
-    match Note::from("b3") {
+    match Note::from("b3", Color::Red, time::Duration::from_millis(1000)) {
         Some(v) => {
             keyboard.play_note(v, Color::Green, 2000, rb);
         },
