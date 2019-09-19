@@ -41,45 +41,21 @@ pub fn print_blackkeys(rustbox: &Arc<Mutex<RustBox>>) {
     rustbox.lock().unwrap().present();
 }
 
-pub fn mark_note(pos: i16, white: bool, color: &str, duration: u32, rustbox: Arc<Mutex<RustBox>>) {
-    let rb_colors = [
-        Color::Black,
-        Color::Red,
-        Color::Green,
-        Color::Yellow,
-        Color::Blue,
-        Color::Magenta,
-        Color::Cyan,
-        Color::White
-    ];
-
-    let colors = [
-        "black",
-        "red",
-        "green",
-        "yellow",
-        "blue",
-        "magenta",
-        "cyan",
-        "white"
-    ];
-
-    let color_pos = colors.iter().position(|&c| c == color).unwrap();
-
+pub fn mark_note(pos: i8, white: bool, color: Color, duration: time::Duration, rustbox: &Arc<Mutex<RustBox>>) {
     if white {
-        rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒▒");
+        rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, color, Color::White, "▒▒");
     } else {
-        rustbox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, rb_colors[color_pos], Color::White, "▒");
+        rustbox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, color, Color::White, "▒");
     }
 
     rustbox.lock().unwrap().present();
+    let clonebox = rustbox.clone();
     thread::spawn(move || {
-        let delay = time::Duration::from_millis(duration.into());
-        thread::sleep(delay);
+        thread::sleep(duration);
         if white {
-            rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, Color::White, Color::White, "▒▒");
+            clonebox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, Color::White, Color::White, "▒▒");
         } else {
-            rustbox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, Color::Black, Color::White, "▒");
+            clonebox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, Color::Black, Color::White, "▒");
         }
     });
 }

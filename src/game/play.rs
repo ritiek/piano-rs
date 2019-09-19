@@ -9,21 +9,22 @@ use std::fs::OpenOptions;
 use std::fs::File;
 use std::io::prelude::*;
 
-struct Player {
+#[derive(Clone)]
+pub struct Player {
     endpoint: rodio::Endpoint,
     samples: HashMap<String, Vec<u8>>,
 }
 
 impl Player {
-    fn new() -> Player {
+    pub fn new() -> Player {
         let endpoint = rodio::get_default_endpoint().unwrap();
         let mut samples = HashMap::new();
 
-        for note in &["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"] {
-            for sequence in -1..8_i16 {
-                Self::read_note(*note, sequence)
+        for base in &["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"] {
+            for frequency in -1..8_i8 {
+                Self::read_note(*base, frequency)
                     .and_then(|sample| {
-                        samples.insert(format!("{}{}", note, sequence), sample);
+                        samples.insert(format!("{}{}", base, frequency), sample);
                         Some(())
                     });
             }
@@ -31,26 +32,25 @@ impl Player {
 
         Player {
             endpoint,
-            samples
+            samples,
         }
     }
 
-    fn get(&self, note: &str, sequence: i16) -> Option<BufReader<Cursor<Vec<u8>>>> {
-        self.samples.get(&format!("{}{}", note, sequence))
+    fn get(&self, base: &str, frequency: i8) -> Option<BufReader<Cursor<Vec<u8>>>> {
+        self.samples.get(&format!("{}{}", base, frequency))
             .map(|v| BufReader::new(Cursor::new(v.clone())))
     }
 
-    fn play(&self, note: &str, sequence: i16, duration: u32, volume: f32) {
-        self.get(note, sequence)
+    pub fn play(&self, base: &str, frequency: i8, duration: time::Duration, volume: f32) {
+        self.get(base, frequency)
             .map(|note| {
                 let mut sink = rodio::play_once(&self.endpoint, note).expect("Cannot play");
                 sink.set_volume(volume);
-                if duration == 0 {
+                if duration == time::Duration::from_millis(0) {
                     sink.detach();
                 } else {
                     thread::spawn(move || {
-                        let delay = time::Duration::from_millis(duration.into());
-                        thread::sleep(delay);
+                        thread::sleep(duration);
                         sink.stop();
                     });
                 }
@@ -59,8 +59,8 @@ impl Player {
             });
     }
 
-    fn read_note(note: &str, sequence: i16) -> Option<Vec<u8>> {
-        let file_path = format!("assets/{0}{1}.ogg", note, sequence);
+    fn read_note(base: &str, frequency: i8) -> Option<Vec<u8>> {
+        let file_path = format!("assets/{0}{1}.ogg", base, frequency);
         std::fs::File::open(file_path)
             .map(|mut file| {
                 let mut data = Vec::new();

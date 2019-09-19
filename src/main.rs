@@ -1,4 +1,4 @@
-use rustbox::{Color, RustBox};
+use rustbox::{Color, RustBox, Key};
 use clap::value_t;
 use std::default::Default;
 use std::sync::{Arc, Mutex};
@@ -6,9 +6,9 @@ use std::{thread, time};
 
 use piano_rs::arguments;
 use piano_rs::game::Note;
-/* use piano_rs::game::play; */
+use piano_rs::game::play::Player;
 /* use piano_rs::game::output; */
-use piano_rs::game::PianoKeyboard;
+use piano_rs::game::{PianoKeyboard, GameEvent};
 
 
 fn main() {
@@ -19,39 +19,52 @@ fn main() {
     let blank_source = rodio::source::SineWave::new(0);
     blank_sink.append(blank_source);
 
-    let rb = match RustBox::init(Default::default()) {
+    let rustbox = match RustBox::init(Default::default()) {
         Result::Ok(v) => Arc::new(Mutex::new(v)),
         Result::Err(e) => panic!("{}", e),
     };
 
-    /* output::display_keyboard(&rb); */
     let volume = value_t!(matches.value_of("volume"), f32).unwrap_or(1.0);
-    let mark_duration = value_t!(matches.value_of("markduration"), u32).unwrap_or(500);
+    let mark_duration = value_t!(matches.value_of("markduration"), u64).unwrap_or(500);
 
     if let Some(playfile) = matches.value_of("play") {
         let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
         let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0);
         /* play::play_from_file(playfile, replaycolor, */
-                             /* mark_duration, volume, tempo, &rb); */
+                             /* mark_duration, volume, tempo, &rustbox); */
     }
 
-    let raw_sequence = value_t!(matches.value_of("sequence"), i16).unwrap_or(2);
-    let note_duration = value_t!(matches.value_of("noteduration"), u32).unwrap_or(0);
+    let sequence = value_t!(matches.value_of("sequence"), i8).unwrap_or(2);
+    let sound_duration = value_t!(matches.value_of("noteduration"), u64).unwrap_or(0);
+    let mark_duration = value_t!(matches.value_of("markduration"), u64).unwrap_or(500);
     let record_file = matches.value_of("record");
-    let color = matches.value_of("color").unwrap_or("red");
-    /* play::play_from_keyboard(&rb, color, mark_duration, note_duration, */
-    /*                          raw_sequence, volume, record_file); */
 
-    let keyboard = PianoKeyboard::new();
-    keyboard.draw(&rb);
-    match Note::from("b3", Color::Red, time::Duration::from_millis(1000)) {
-        Some(v) => {
-            keyboard.play_note(v, Color::Green, 2000, rb);
-        },
-        None => { },
+    let mut keyboard = PianoKeyboard::new(
+        sequence,
+        volume,
+        time::Duration::from_millis(sound_duration),
+        time::Duration::from_millis(mark_duration),
+        Color::Red,
+    );
+
+    keyboard.draw(&rustbox);
+    loop {
+        let event = rustbox.lock().unwrap().poll_event(false);
+        match event {
+            Ok(rustbox::Event::KeyEvent(key)) => {
+                match keyboard.process_key(key) {
+                    Some(GameEvent::Note(note)) => keyboard.play_note(note, &rustbox),
+                    Some(GameEvent::Quit) => break,
+                    None => { },
+                };
+            }
+            Err(e) => panic!("{}", e),
+            _ => { },
+        }
     }
-    let delay = time::Duration::from_millis(10000);
-    thread::sleep(delay);
+
+    /* let timeout = time::Duration::from_millis(10000); */
+    /* thread::sleep(timeout); */
 }
 
 

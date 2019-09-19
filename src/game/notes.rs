@@ -7,7 +7,7 @@ use serde::ser::{Serialize, Serializer, SerializeStruct};
 use rustbox::{Key, Color};
 use std::time::Duration;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(remote = "Color")]
 pub enum ColorDef {
     Black,
@@ -25,8 +25,8 @@ pub enum ColorDef {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Note {
     pub sound: String,
-    base: String,
-    frequency: i8,
+    pub base: String,
+    pub frequency: i8,
     pub position: i8,
     pub white: bool,
     #[serde(with = "ColorDef")]
@@ -89,7 +89,7 @@ impl Note {
             sound: format!("{}{}", base_sound, frequency),
             base: base_sounds[index].to_string(),
             frequency: frequency,
-            position: init_poses[index] + 21 * (frequency + 1),
+            position: init_poses[index] + 21 * (frequency - factors[index]),
             white: whites[index],
             color: color,
             duration: duration,
@@ -112,16 +112,6 @@ pub fn key_to_base_note(mut key: Key, sequence: i8) -> Option<String> {
                  "fs", "g", "gs", "gs", "a", "a", "as", "as", "b",
                  "b", "c", "c", "cs", "cs", "d", "ds", "e", "f",
                  "fs", "g", "gs", "a", "as", "b", "c", "d", "e", "gs"];
-
-    let init_poses = [1, 3, 4, 7, 9, 10, 12, 13, 16,
-                      18, 19, 21, 21, 22, 22, 24, 24, 25,
-                      25, 28, 28, 30, 30, 31, 33, 34, 37,
-                      39, 40, 42, 43, 45, 46, 49, 52, 55, 0];
-
-    let whites = [true, false, true, true, false, true, false, true, true,
-                  false, true, false, false, true, true, false, false, true,
-                  true, true, true, false, false, true, false, true, true,
-                  false, true, false, true, false, true, true, true, true, false];
 
     let factors = [-1, -1, -1, 0, 0, 0, 0, 0, 0,
                    0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -164,7 +154,6 @@ pub fn key_to_base_note(mut key: Key, sequence: i8) -> Option<String> {
         }
 
         if let Some(i) = keys.iter().position(|&key| key == c) {
-            let init_pos = init_poses[i];
             let factor = factors[i];
 
             let base_note = format!("{}{}",
@@ -182,28 +171,4 @@ pub fn key_to_base_note(mut key: Key, sequence: i8) -> Option<String> {
     };
 
     note
-}
-
-
-#[cfg(test)]
-mod tests {
-    use super::{
-        Note,
-        match_note,
-        Key
-    };
-
-    #[test]
-    fn check_note_attributes() {
-        // Check attributes for random note
-        let note = match_note(Key::Char('q'), 2);
-        let expect_note = Note {
-                              base: "a".to_string(),
-                              frequency: 2,
-                              position: 64,
-                              white: true
-                           };
-
-        assert_eq!(note, expect_note);
-    }
 }
