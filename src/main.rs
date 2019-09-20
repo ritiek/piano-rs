@@ -40,6 +40,7 @@ fn main() -> Result<()> {
     let mark_duration = value_t!(matches.value_of("markduration"), u64).unwrap_or(500);
     let record_file = matches.value_of("record");
 
+
     let args: Vec<String> = env::args().collect();
     let bind_interface: &str = "0.0.0.0";
 
@@ -53,13 +54,7 @@ fn main() -> Result<()> {
         .parse()
         .unwrap();
 
-    let host_addr: SocketAddr = match args.len() {
-        1 => receiver_addr,
-        _ => args[1]
-            .parse()
-            .unwrap(),
-    };
-
+    let host_addr = value_t!(matches.value_of("host"), SocketAddr).unwrap_or(receiver_addr);
     let event_receiver = Receiver::new(receiver_addr)?;
     let event_sender = Arc::new(Mutex::new(Sender::new(sender_addr, host_addr)?));
     let event_sender_clone = event_sender.clone();
