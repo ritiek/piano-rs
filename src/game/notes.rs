@@ -1,3 +1,5 @@
+pub mod play;
+
 use std::ascii::AsciiExt;
 use std::num::ParseIntError;
 use std::convert::Infallible;
@@ -6,6 +8,7 @@ use serde_derive::{Serialize, Deserialize};
 use serde::ser::{Serialize, Serializer, SerializeStruct};
 use rustbox::{Key, Color};
 use std::time::Duration;
+pub use play::Player;
 
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(remote = "Color")]
@@ -96,7 +99,8 @@ impl Note {
         }
     }
 
-    pub fn play(endpoint: Endpoint) {
+    pub fn play(&self, player: &Player, volume: f32) {
+        player.play(&self.base, self.frequency, self.duration, volume);
     }
 }
 

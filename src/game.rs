@@ -3,14 +3,13 @@
 /* pub mod play; */
 
 pub mod output;
-pub mod play;
 pub mod notes;
 
 use rustbox::{Color, RustBox, Key};
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
 pub use notes::Note;
-pub use play::Player;
+pub use notes::Player;
 
 #[derive(Debug)]
 pub enum GameEvent {
@@ -47,12 +46,7 @@ impl PianoKeyboard {
     }
 
     pub fn play_note(&self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {
-        self.player.play(
-            &note.base,
-            note.frequency,
-            self.sound_duration,
-            self.volume,
-        );
+        note.play(&self.player, self.volume);
 
         output::mark_note(
             note.position,
@@ -61,9 +55,6 @@ impl PianoKeyboard {
             self.mark_duration,
             &rustbox,
         );
-
-        /* note.draw(); */
-        /* note.play(); */
     }
 
     pub fn process_key(&mut self, key: Key) -> Option<GameEvent> {

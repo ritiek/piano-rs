@@ -6,7 +6,7 @@ use std::{thread, time};
 
 use piano_rs::arguments;
 use piano_rs::game::Note;
-use piano_rs::game::play::Player;
+use piano_rs::game::Player;
 /* use piano_rs::game::output; */
 use piano_rs::game::{PianoKeyboard, GameEvent};
 
