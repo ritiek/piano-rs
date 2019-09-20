@@ -25,7 +25,7 @@ pub enum ColorDef {
     Default,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Note {
     pub sound: String,
     pub base: String,

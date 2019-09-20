@@ -10,8 +10,9 @@ use std::sync::{Arc, Mutex};
 use std::{thread, time};
 pub use notes::Note;
 pub use notes::Player;
+use serde_derive::{Serialize, Deserialize};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum GameEvent {
     Note(Note),
     Quit,
