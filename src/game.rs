@@ -61,7 +61,7 @@ impl PianoKeyboard {
     pub fn process_key(&mut self, key: Key) -> Option<GameEvent> {
         let note = match key {
             Key::Right => {
-                if self.sequence < 5 {
+                if self.sequence < 6 {
                     self.sequence += 1;
                 }
                 None
