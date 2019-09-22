@@ -27,7 +27,7 @@ pub struct Note {
     pub sound: String,
     pub base: String,
     pub frequency: i8,
-    pub position: i8,
+    pub position: i16,
     pub white: bool,
     #[serde(with = "ColorDef")]
     pub color: Color,
@@ -89,7 +89,7 @@ impl Note {
             sound: format!("{}{}", base_sound, frequency),
             base: base_sounds[index].to_string(),
             frequency: frequency,
-            position: init_poses[index] + 21 * (frequency - factors[index]),
+            position: init_poses[index] + 21 * ((frequency - factors[index]) as i16),
             white: whites[index],
             color: color,
             duration: duration,

@@ -10,7 +10,7 @@ pub fn print_whitekeys(rustbox: &Arc<Mutex<RustBox>>) {
     for y in 0..16 {
         // Last border is lonely
         rustbox.lock().unwrap().print(156, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
-        for x in 0..52 {
+        for x in 0..58 {
             let k = x * 3;
             rustbox.lock().unwrap().print(k, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
             rustbox.lock().unwrap().print(k + 1, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
@@ -24,7 +24,7 @@ pub fn print_blackkeys(rustbox: &Arc<Mutex<RustBox>>) {
         // First black key is lonely
         rustbox.lock().unwrap().print(3, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
 
-        for x in 0..7 {
+        for x in 0..8 {
             let g1k1 = x * 21 + 9;
             let g1k2 = g1k1 + 3;
             rustbox.lock().unwrap().print(g1k1, y, rustbox::RB_BOLD, Color::Black, Color::White, "█");
@@ -41,7 +41,7 @@ pub fn print_blackkeys(rustbox: &Arc<Mutex<RustBox>>) {
     rustbox.lock().unwrap().present();
 }
 
-pub fn mark_note(pos: i8, white: bool, color: Color, duration: time::Duration, rustbox: &Arc<Mutex<RustBox>>) {
+pub fn mark_note(pos: i16, white: bool, color: Color, duration: time::Duration, rustbox: &Arc<Mutex<RustBox>>) {
     if white {
         rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, color, Color::White, "▒▒");
     } else {
