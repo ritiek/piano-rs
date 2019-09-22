@@ -7,6 +7,13 @@ pub fn get_arguments<'a>() -> ArgMatches<'a> {
         .author("Ritiek Malhotra <ritiekmalhotra123@gmail.com>")
         .about("Play piano in the terminal using PC (computer) keyboard.")
 
+        .arg(Arg::with_name("host")
+            .short("h")
+            .long("host")
+            .value_name("ADDRESS")
+            .takes_value(true)
+            .help("Set the host's IP Address (Default: 0.0.0.0:9999)"))
+
         .arg(Arg::with_name("volume")
             .short("v")
             .long("volume")
