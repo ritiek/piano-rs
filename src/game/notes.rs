@@ -1,11 +1,8 @@
 pub mod play;
 
-use std::ascii::AsciiExt;
 use std::num::ParseIntError;
 use std::convert::Infallible;
-use rodio::Endpoint;
 use serde_derive::{Serialize, Deserialize};
-use serde::ser::{Serialize, Serializer, SerializeStruct};
 use rustbox::{Key, Color};
 use std::time::Duration;
 pub use play::Player;
@@ -56,7 +53,7 @@ impl Note {
         for start_index in 1..note.len() {
             frequency = note[start_index..].parse();
             base_sound = note[..start_index].parse();
-            if let Ok(v) = frequency {
+            if let Ok(_) = frequency {
                 break;
             }
         }

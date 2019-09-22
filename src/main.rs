@@ -1,26 +1,26 @@
-use rustbox::{Color, RustBox, Key};
+use rustbox::{Color, RustBox};
 use clap::value_t;
 use std::default::Default;
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
 use std::net::SocketAddr;
 use std::io::Result;
-use std::env;
-use std::error::Error;
 
 use piano_rs::arguments;
 use piano_rs::game::{
     PianoKeyboard,
-    Note,
-    Player,
-    GameEvent
+    GameEvent,
 };
-use piano_rs::network::{NetworkEvent, Receiver, Sender};
+use piano_rs::network::{
+    NetworkEvent,
+    Receiver,
+    Sender,
+};
 
 fn main() -> Result<()> {
     let matches = arguments::get_arguments();
     // A workaround to stop cracking noise after note ends (issue #4)
-    let blank_point = rodio::get_default_endpoint().unwrap();
+    let blank_point = rodio::default_output_device().unwrap();
     let blank_sink = rodio::Sink::new(&blank_point);
     let blank_source = rodio::source::SineWave::new(0);
     blank_sink.append(blank_source);
@@ -28,20 +28,17 @@ fn main() -> Result<()> {
     let volume = value_t!(matches.value_of("volume"), f32).unwrap_or(1.0);
     let mark_duration = value_t!(matches.value_of("markduration"), u64).unwrap_or(500);
 
-    if let Some(playfile) = matches.value_of("play") {
-        let replaycolor = matches.value_of("replaycolor").unwrap_or("blue");
-        let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0);
-        /* play::play_from_file(playfile, replaycolor, */
-                             /* mark_duration, volume, tempo, &rustbox); */
-    }
+    /* if let Some(playfile) = matches.value_of("play") { */
+    /*     let replaycolor = matches.value_of("replaycolor").unwrap_or("blue"); */
+    /*     let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0); */
+    /*     /1* play::play_from_file(playfile, replaycolor, *1/ */
+    /*                          /1* mark_duration, volume, tempo, &rustbox); *1/ */
+    /* } */
 
     let sequence = value_t!(matches.value_of("sequence"), i8).unwrap_or(2);
     let sound_duration = value_t!(matches.value_of("noteduration"), u64).unwrap_or(0);
-    let mark_duration = value_t!(matches.value_of("markduration"), u64).unwrap_or(500);
-    let record_file = matches.value_of("record");
+    /* let record_file = matches.value_of("record"); */
 
-
-    let args: Vec<String> = env::args().collect();
     let bind_interface: &str = "0.0.0.0";
 
     let receiver_port: u16 = 9999;
@@ -63,15 +60,15 @@ fn main() -> Result<()> {
         RustBox::init(Default::default()).unwrap()
     ));
 
-    let mut keyboard = PianoKeyboard::new(
+    let keyboard = Arc::new(Mutex::new(PianoKeyboard::new(
         sequence,
         volume,
         time::Duration::from_millis(sound_duration),
         time::Duration::from_millis(mark_duration),
-        Color::Red,
-    );
+        Color::Blue,
+    )));
 
-    keyboard.draw(&rustbox);
+    keyboard.lock().unwrap().draw(&rustbox);
 
     let clonebox = rustbox.clone();
     let cloneboard = keyboard.clone();
@@ -79,8 +76,6 @@ fn main() -> Result<()> {
     thread::spawn(move || {
         loop {
             let data = event_receiver.poll_event().unwrap();
-            println!("{:?}", data);
-
             match data.event {
                 NetworkEvent::PlayerJoin => {
                     let remote_receiver_addr: SocketAddr = format!("{}:9999", data.src.ip())
@@ -95,8 +90,19 @@ fn main() -> Result<()> {
                     peers[0] = format!("{}:9999", data.src.ip()).parse().unwrap();
                     event_sender_clone.lock().unwrap().peer_addrs = peers;
                 }
+                NetworkEvent::ID(id) => {
+                    cloneboard.lock().unwrap().set_note_color(match id {
+                        0 => Color::Blue,
+                        1 => Color::Red,
+                        2 => Color::Green,
+                        3 => Color::Yellow,
+                        4 => Color::Cyan,
+                        5 => Color::Magenta,
+                        _ => Color::Black,
+                    });
+                }
                 NetworkEvent::Note(note) => {
-                    cloneboard.play_note(note, &clonebox);
+                    cloneboard.lock().unwrap().play_note(note, &clonebox);
                 }
                _ => { },
             }
@@ -110,8 +116,10 @@ fn main() -> Result<()> {
         let event = rustbox.lock().unwrap().peek_event(duration, false);
         match event {
             Ok(rustbox::Event::KeyEvent(key)) => {
-                match keyboard.process_key(key) {
-                    Some(GameEvent::Note(note)) => event_sender.lock().unwrap().tick(note).unwrap(),
+                match keyboard.lock().unwrap().process_key(key) {
+                    Some(GameEvent::Note(note)) => {
+                        event_sender.lock().unwrap().tick(note).unwrap();
+                    }
                     Some(GameEvent::Quit) => break,
                     None => { },
                 };

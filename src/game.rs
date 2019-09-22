@@ -1,13 +1,9 @@
-/* pub mod notes; */
-/* pub mod output; */
-/* pub mod play; */
-
 pub mod output;
 pub mod notes;
 
 use rustbox::{Color, RustBox, Key};
 use std::sync::{Arc, Mutex};
-use std::{thread, time};
+use std::time;
 pub use notes::Note;
 pub use notes::Player;
 use serde_derive::{Serialize, Deserialize};
@@ -37,7 +33,7 @@ impl PianoKeyboard {
             sound_duration: sound_duration,
             mark_duration: mark_duration,
             color: color,
-            player: player
+            player: player,
         }
     }
 
@@ -58,6 +54,10 @@ impl PianoKeyboard {
         );
     }
 
+    pub fn set_note_color(&mut self, color: Color) {
+        self.color = color;
+    }
+
     pub fn process_key(&mut self, key: Key) -> Option<GameEvent> {
         let note = match key {
             Key::Right => {
@@ -73,13 +73,14 @@ impl PianoKeyboard {
                 None
             }
             Key::Up => {
+                // The note sound files are maximum 8s in length
                 if self.sound_duration < time::Duration::from_millis(8000) {
                     self.sound_duration += time::Duration::from_millis(50);
                 }
                 None
             }
             Key::Down => {
-                if self.sound_duration > time::Duration::from_millis(0) {
+                if self.sound_duration > time::Duration::new(0, 0) {
                     self.sound_duration -= time::Duration::from_millis(50);
                 }
                 None

@@ -1,23 +1,20 @@
-use yaml_rust::{YamlLoader, Yaml};
-use rustbox::{RustBox, Key};
-
+/* use yaml_rust::{YamlLoader, Yaml}; */
 use std::io::{BufReader, Read, Cursor};
-use std::sync::{Arc, Mutex};
 use std::{thread, time};
 use std::collections::HashMap;
-use std::fs::OpenOptions;
-use std::fs::File;
-use std::io::prelude::*;
+/* use std::fs::OpenOptions; */
+/* use std::fs::File; */
+/* use std::io::prelude::*; */
 
 #[derive(Clone)]
 pub struct Player {
-    endpoint: rodio::Endpoint,
+    device: rodio::Device,
     samples: HashMap<String, Vec<u8>>,
 }
 
 impl Player {
     pub fn new() -> Player {
-        let endpoint = rodio::get_default_endpoint().unwrap();
+        let device = rodio::default_output_device().unwrap();
         let mut samples = HashMap::new();
 
         for base in &["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"] {
@@ -31,7 +28,7 @@ impl Player {
         }
 
         Player {
-            endpoint,
+            device,
             samples,
         }
     }
@@ -44,7 +41,7 @@ impl Player {
     pub fn play(&self, base: &str, frequency: i8, duration: time::Duration, volume: f32) {
         self.get(base, frequency)
             .map(|note| {
-                let mut sink = rodio::play_once(&self.endpoint, note).expect("Cannot play");
+                let sink = rodio::play_once(&self.device, note).expect("Cannot play");
                 sink.set_volume(volume);
                 if duration == time::Duration::from_millis(0) {
                     sink.detach();
