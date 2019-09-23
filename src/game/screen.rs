@@ -117,3 +117,4 @@ pub fn mark_note(pos: i16, white: bool, color: Color, duration: time::Duration, 
         }
     });
 }
+

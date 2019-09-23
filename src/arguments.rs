@@ -79,3 +79,4 @@ pub fn get_arguments<'a>() -> ArgMatches<'a> {
 
         .get_matches()
 }
+
