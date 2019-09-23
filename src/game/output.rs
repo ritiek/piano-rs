@@ -15,6 +15,7 @@ pub fn print_whitekeys(rustbox: &Arc<Mutex<RustBox>>) {
             rustbox.lock().unwrap().print(k, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
             rustbox.lock().unwrap().print(k + 1, y, rustbox::RB_BOLD, Color::White, Color::Black, "██");
         }
+         rustbox.lock().unwrap().print(58 * 3, y, rustbox::RB_BOLD, Color::Black, Color::White, "|");
     }
     rustbox.lock().unwrap().present();
 }
