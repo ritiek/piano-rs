@@ -39,7 +39,7 @@ impl PianoKeyboard {
     }
 
     pub fn draw(&self, rustbox: &Arc<Mutex<RustBox>>) {
-        pianokeys::draw(98, rustbox);
+        pianokeys::draw(rustbox);
     }
 
     pub fn play_note(&self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {

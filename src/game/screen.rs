@@ -15,7 +15,7 @@ pub mod pianokeys {
         y: u16,
     }
 
-    pub fn draw(keys: u16, rustbox: &Arc<Mutex<RustBox>>) {
+    pub fn draw(rustbox: &Arc<Mutex<RustBox>>) {
         print_whites(rustbox);
         print_blacks(rustbox);
         rustbox.lock().unwrap().present();
