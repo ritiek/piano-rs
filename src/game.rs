@@ -1,4 +1,4 @@
-pub mod output;
+pub mod screen;
 pub mod notes;
 
 use rustbox::{Color, RustBox, Key};
@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::time;
 pub use notes::Note;
 pub use notes::Player;
+use screen::pianokeys;
 use serde_derive::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -38,14 +39,13 @@ impl PianoKeyboard {
     }
 
     pub fn draw(&self, rustbox: &Arc<Mutex<RustBox>>) {
-        output::print_whitekeys(rustbox);
-        output::print_blackkeys(rustbox);
+        pianokeys::draw(rustbox);
     }
 
     pub fn play_note(&self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {
         note.play(&self.player, self.volume);
 
-        output::mark_note(
+        screen::mark_note(
             note.position,
             note.white,
             note.color,
@@ -113,3 +113,4 @@ impl PianoKeyboard {
         note
     }
 }
+
