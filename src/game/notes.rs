@@ -60,6 +60,7 @@ impl Note {
         (base_sound, frequency)
     }
 
+    // TODO: Return Result<Note> instead of Note.
     fn parse_note(base_sound: &str, frequency: i8, color: Color, duration: Duration) -> Note {
         let base_sounds = ["a", "as", "b", "c", "cs", "d", "ds", "e", "f",
                      "fs", "g", "gs", "gs", "a", "a", "as", "as", "b",
@@ -83,7 +84,7 @@ impl Note {
 
         let index = base_sounds.iter()
                        .position(|&key| key == base_sound)
-                       .unwrap();
+                       .unwrap(); // ?;
 
         Note {
             sound: format!("{}{}", base_sound, frequency),
@@ -172,5 +173,87 @@ pub fn key_to_base_note(mut key: Key, sequence: i8) -> Option<String> {
     };
 
     note
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn note_from() {
+        let expected_note = super::Note {
+            sound: "a2".to_string(),
+            base: "a".to_string(),
+            frequency: 2,
+            position: 64,
+            white: true,
+            color: super::Color::Blue,
+            duration: super::Duration::from_millis(100)
+        };
+
+        match super::Note::from("a2", super::Color::Blue, super::Duration::from_millis(100)) {
+            Some(actual_note) => assert_eq!(actual_note, expected_note),
+            None => panic!("This note should have been parsable!"),
+        }
+    }
+
+    #[test]
+    fn extract_base_sound_and_frequency_from_sound() {
+        match super::Note::extract_base_sound_and_frequency("a2") {
+            (Ok(v), Ok(w)) => assert_eq!((v.as_str(), w), ("a", 2)),
+            _ => panic!("This sound should have been parsable!"),
+        }
+    }
+
+    #[test]
+    // TODO: Update this test when super::Note::parse_note() returns
+    //       Result<Note> instead of Note.
+    fn parse_note() {
+        let actual_note = super::Note::parse_note(
+            "a",
+            2,
+            super::Color::Blue,
+            super::Duration::from_millis(100)
+        )/*.unwrap()*/;
+
+        let expected_note = super::Note {
+            sound: "a2".to_string(),
+            base: "a".to_string(),
+            frequency: 2,
+            position: 64,
+            white: true,
+            color: super::Color::Blue,
+            duration: super::Duration::from_millis(100),
+        };
+
+        assert_eq!(actual_note, expected_note);
+    }
+
+    // TODO: Write failing test when super::Note::parse_note() returns
+    //       Result<Note> instead of Note.
+
+    // #[test]
+    // #[should_panic]
+    // fn parse_note_err() {
+    //     let actual_note = super::Note::parse_note(
+    //         "a",
+    //         2,
+    //         super::Color::Blue,
+    //         super::Duration::from_millis(100)
+    //     ).unwrap();
+    // }
+
+    #[test]
+    fn key_to_base_note() {
+        let base_note = super::key_to_base_note(super::Key::Char('a'), 2);
+        match base_note {
+            Some(v) => assert_eq!(v, "gs1"),
+            None => panic!("The key should have been parsable!"),
+        }
+    }
+
+    #[test]
+    fn key_to_base_note_none() {
+        let base_note = super::key_to_base_note(super::Key::Char('~'), 2);
+        assert!(base_note.is_none());
+    }
 }
 

@@ -1,10 +1,6 @@
-/* use yaml_rust::{YamlLoader, Yaml}; */
 use std::io::{BufReader, Read, Cursor};
 use std::{thread, time};
 use std::collections::HashMap;
-/* use std::fs::OpenOptions; */
-/* use std::fs::File; */
-/* use std::io::prelude::*; */
 
 #[derive(Clone)]
 pub struct Player {
@@ -65,27 +61,45 @@ impl Player {
                 data
             }).ok()
     }
+}
 
-    /* fn write_note(&self, note: &notes::Note, duration: u32, */
-    /*               file_path: &str, time_diff: time::Duration, n: u32) { */
-    /*     let diff_in_ms = Self::get_ms(time_diff); */
-    /*     let mut file = OpenOptions::new() */
-    /*         .write(true) */
-    /*         .create(true) */
-    /*         .append(true) */
-    /*         .open(file_path) */
-    /*         .unwrap(); */
-    /*     let note_details = format!("note_{}:\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n  - {}\n", */
-    /*                                n, note.sound, note.sequence, duration, diff_in_ms, note.position, note.white); */
+#[cfg(test)]
+mod test {
+    use super::Player;
+    use std::fs;
 
-        /* if let Err(e) = writeln!(file, "{}", note_details) { */
-        /*     eprintln!("Couldn't write to file: {}", e); */
-        /* } */
-    /* } */
+    #[test]
+    fn load_sound_files() {
+        let player = Player::new();
+        println!("{:?}", player.samples.len());
+        let asset_path = fs::read_dir("assets").unwrap();
+        assert_eq!(player.samples.len(), asset_path.count());
+    }
 
-    /* fn get_ms(time_diff: time::Duration) -> u64 { */
-    /*     let nanos = u64::from(time_diff.subsec_nanos()); */
-		/* (1000*1000*1000 * time_diff.as_secs() + nanos)/(1000 * 1000) */
-    /* } */
+    #[test]
+    fn get_note_some() {
+        let player = Player::new();
+        let note_sound = player.get("a", 2);
+        assert!(note_sound.is_some());
+    }
+
+    #[test]
+    fn get_note_none() {
+        let player = Player::new();
+        let note_sound = player.get("z", 9);
+        assert!(note_sound.is_none());
+    }
+
+    #[test]
+    fn read_note_some() {
+        let note = Player::read_note("a", 2);
+        assert!(note.is_some());
+    }
+
+    #[test]
+    fn read_note_none() {
+        let note = Player::read_note("z", 9);
+        assert!(note.is_none());
+    }
 }
 
