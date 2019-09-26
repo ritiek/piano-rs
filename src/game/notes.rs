@@ -233,14 +233,14 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn parse_note_err() {
-        super::Note::parse_note(
+        let note = super::Note::parse_note(
             "z",
             9,
             super::Color::Blue,
             super::Duration::from_millis(100)
-        ).unwrap();
+        );
+        assert!(note.is_err());
     }
 
     #[test]
