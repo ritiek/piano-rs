@@ -37,12 +37,15 @@ pub struct Note {
 impl Note {
     pub fn from(sound: &str, color: Color, duration: Duration) -> Option<Note> {
         match Self::extract_base_sound_and_frequency(sound) {
-            (Ok(base_sound), Ok(frequency)) => Some(Self::parse_note(
-                &base_sound,
-                frequency,
-                color,
-                duration,
-            )),
+            (Ok(base_sound), Ok(frequency)) => {
+                let parsed_note = Self::parse_note(
+                    &base_sound,
+                    frequency,
+                    color,
+                    duration,
+                );
+                parsed_note.ok()
+            }
             _ => None,
         }
     }
@@ -60,7 +63,7 @@ impl Note {
         (base_sound, frequency)
     }
 
-    fn parse_note(base_sound: &str, frequency: i8, color: Color, duration: Duration) -> Note {
+    fn parse_note(base_sound: &str, frequency: i8, color: Color, duration: Duration) -> Result<Note, String> {
         let base_sounds = ["a", "as", "b", "c", "cs", "d", "ds", "e", "f",
                      "fs", "g", "gs", "gs", "a", "a", "as", "as", "b",
                      "b", "c", "c", "cs", "cs", "d", "ds", "e", "f",
@@ -82,17 +85,19 @@ impl Note {
                        1, 1, 1, 1, 1, 1, 2, 2, 2, -1];
 
         let index = base_sounds.iter()
-                       .position(|&key| key == base_sound)
-                       .unwrap();
+                       .position(|&key| key == base_sound);
 
-        Note {
-            sound: format!("{}{}", base_sound, frequency),
-            base: base_sounds[index].to_string(),
-            frequency: frequency,
-            position: init_poses[index] + 21 * ((frequency - factors[index]) as i16),
-            white: whites[index],
-            color: color,
-            duration: duration,
+        match index {
+            Some(v) => Ok(Note {
+                sound: format!("{}{}", base_sound, frequency),
+                base: base_sounds[v].to_string(),
+                frequency: frequency,
+                position: init_poses[v] + 21 * ((frequency - factors[v]) as i16),
+                white: whites[v],
+                color: color,
+                duration: duration,
+            }),
+            None => Err(String::from("We're Fucked.")),
         }
     }
 
@@ -172,5 +177,82 @@ pub fn key_to_base_note(mut key: Key, sequence: i8) -> Option<String> {
     };
 
     note
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn note_from() {
+        let expected_note = super::Note {
+            sound: "a2".to_string(),
+            base: "a".to_string(),
+            frequency: 2,
+            position: 64,
+            white: true,
+            color: super::Color::Blue,
+            duration: super::Duration::from_millis(100)
+        };
+
+        match super::Note::from("a2", super::Color::Blue, super::Duration::from_millis(100)) {
+            Some(actual_note) => assert_eq!(actual_note, expected_note),
+            None => panic!("This note should have been parsable!"),
+        }
+    }
+
+    #[test]
+    fn extract_base_sound_and_frequency_from_sound() {
+        match super::Note::extract_base_sound_and_frequency("a2") {
+            (Ok(v), Ok(w)) => assert_eq!((v.as_str(), w), ("a", 2)),
+            _ => panic!("This sound should have been parsable!"),
+        }
+    }
+
+    #[test]
+    fn parse_note() {
+        let actual_note = super::Note::parse_note(
+            "a",
+            2,
+            super::Color::Blue,
+            super::Duration::from_millis(100)
+        ).unwrap();
+
+        let expected_note = super::Note {
+            sound: "a2".to_string(),
+            base: "a".to_string(),
+            frequency: 2,
+            position: 64,
+            white: true,
+            color: super::Color::Blue,
+            duration: super::Duration::from_millis(100),
+        };
+
+        assert_eq!(actual_note, expected_note);
+    }
+
+    #[test]
+    fn parse_note_err() {
+        let note = super::Note::parse_note(
+            "z",
+            9,
+            super::Color::Blue,
+            super::Duration::from_millis(100)
+        );
+        assert!(note.is_err());
+    }
+
+    #[test]
+    fn key_to_base_note() {
+        let base_note = super::key_to_base_note(super::Key::Char('a'), 2);
+        match base_note {
+            Some(v) => assert_eq!(v, "gs1"),
+            None => panic!("The key should have been parsable!"),
+        }
+    }
+
+    #[test]
+    fn key_to_base_note_none() {
+        let base_note = super::key_to_base_note(super::Key::Char('~'), 2);
+        assert!(base_note.is_none());
+    }
 }
 

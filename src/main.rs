@@ -131,35 +131,3 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-
-#[cfg(test)]
-mod tests {
-    use std::path::Path;
-
-    #[test]
-    fn check_missing_notes() {
-        // Find missing notes in assets/*.ogg, if any
-        let mut missing_notes = Vec::new();
-        let expected_notes = ["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"];
-        for expected_note in expected_notes.iter() {
-            if expected_note == &"a" || expected_note == &"as" {
-                let note = format!("{}-1.ogg", expected_note);
-				let note_path = format!("assets/{}", note);
-                if !Path::new(&note_path).exists() {
-                    missing_notes.push(note);
-                }
-            }
-			for sequence in 0..8_u16 {
-				let note = format!("{}{}.ogg", expected_note, sequence);
-				let note_path = format!("assets/{}", note);
-                if !Path::new(&note_path).exists() {
-                    missing_notes.push(note);
-                }
-            }
-        }
-
-        assert!(missing_notes.len() == 0,
-                "Some note sounds are missing: {}", missing_notes.join(", "));
-    }
-}
-
