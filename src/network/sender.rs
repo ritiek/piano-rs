@@ -2,7 +2,6 @@ use std::net::{SocketAddr, UdpSocket};
 use std::io::Result;
 use crate::network::types;
 
-
 #[derive(Debug)]
 pub struct Sender {
     pub socket: UdpSocket,
