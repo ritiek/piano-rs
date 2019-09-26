@@ -44,10 +44,7 @@ impl Note {
                     color,
                     duration,
                 );
-                match parsed_note {
-                    Ok(v) => Some(v),
-                    Err(_) => None,
-                }
+                parsed_note.ok()
             }
             _ => None,
         }
