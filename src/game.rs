@@ -1,11 +1,14 @@
 pub mod screen;
 pub mod notes;
+pub mod record;
 
 use rustbox::{Color, RustBox, Key};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use std::path::PathBuf;
 pub use notes::Note;
 pub use notes::Player;
+pub use record::NoteRecorder;
 use screen::pianokeys;
 use serde_derive::{Serialize, Deserialize};
 
@@ -15,7 +18,6 @@ pub enum GameEvent {
     Quit,
 }
 
-#[derive(Clone)]
 pub struct PianoKeyboard {
     sequence: i8,
     volume: f32,
@@ -23,11 +25,13 @@ pub struct PianoKeyboard {
     mark_duration: Duration,
     color: Color,
     player: Player,
+    recorder: NoteRecorder,
 }
 
 impl PianoKeyboard {
     pub fn new(sequence: i8, volume: f32, sound_duration: Duration, mark_duration: Duration, color: Color) -> PianoKeyboard {
         let player = Player::new();
+
         PianoKeyboard {
             sequence: sequence,
             volume: volume,
@@ -35,14 +39,19 @@ impl PianoKeyboard {
             mark_duration: mark_duration,
             color: color,
             player: player,
+            recorder: NoteRecorder::new(),
         }
+    }
+
+    pub fn set_record_file(&mut self, record_file: PathBuf) {
+        self.recorder.set_file(record_file);
     }
 
     pub fn draw(&self, rustbox: &Arc<Mutex<RustBox>>) {
         pianokeys::draw(rustbox);
     }
 
-    pub fn play_note(&self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {
+    pub fn play_note(&mut self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {
         note.play(&self.player, self.volume);
 
         screen::mark_note(
@@ -52,6 +61,10 @@ impl PianoKeyboard {
             self.mark_duration,
             &rustbox,
         );
+
+        if let Some(_) = &self.recorder.record_file {
+            self.recorder.write_note(note);
+        }
     }
 
     pub fn set_note_color(&mut self, color: Color) {

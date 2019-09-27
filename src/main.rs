@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex};
 use std::{thread, time};
 use std::net::SocketAddr;
 use std::io::Result;
+use std::path::PathBuf;
 
 use piano_rs::arguments;
 use piano_rs::game::{
@@ -28,16 +29,8 @@ fn main() -> Result<()> {
     let volume = value_t!(matches.value_of("volume"), f32).unwrap_or(1.0);
     let mark_duration = value_t!(matches.value_of("markduration"), u64).unwrap_or(500);
 
-    /* if let Some(playfile) = matches.value_of("play") { */
-    /*     let replaycolor = matches.value_of("replaycolor").unwrap_or("blue"); */
-    /*     let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0); */
-    /*     /1* play::play_from_file(playfile, replaycolor, *1/ */
-    /*                          /1* mark_duration, volume, tempo, &rustbox); *1/ */
-    /* } */
-
     let sequence = value_t!(matches.value_of("sequence"), i8).unwrap_or(2);
     let sound_duration = value_t!(matches.value_of("noteduration"), u64).unwrap_or(0);
-    /* let record_file = matches.value_of("record"); */
 
     let bind_interface: &str = "0.0.0.0";
 
@@ -110,6 +103,17 @@ fn main() -> Result<()> {
     });
 
     event_sender.lock().unwrap().register_self()?;
+
+    if let Some(v) = matches.value_of("record") {
+        keyboard.lock().unwrap().set_record_file(PathBuf::from(v));
+    }
+
+    if let Some(playfile) = matches.value_of("play") {
+        let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0);
+        keyboard.play_from_file(playfile, replaycolor,
+                             mark_duration, volume, tempo, &rustbox);
+    }
+
 
     let duration = time::Duration::from_nanos(1000);
     loop {
