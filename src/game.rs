@@ -1,6 +1,6 @@
 pub mod screen;
 pub mod notes;
-pub mod record;
+pub mod notes_file;
 
 use rustbox::{Color, RustBox, Key};
 use std::sync::{Arc, Mutex};
@@ -8,7 +8,7 @@ use std::time::Duration;
 use std::path::PathBuf;
 pub use notes::Note;
 pub use notes::Player;
-pub use record::NoteRecorder;
+pub use notes_file::{NoteReader, FileNote, NoteRecorder};
 use screen::pianokeys;
 use serde_derive::{Serialize, Deserialize};
 
@@ -23,7 +23,7 @@ pub struct PianoKeyboard {
     volume: f32,
     sound_duration: Duration,
     mark_duration: Duration,
-    color: Color,
+    pub color: Color,
     player: Player,
     recorder: NoteRecorder,
 }
@@ -70,6 +70,20 @@ impl PianoKeyboard {
     pub fn set_note_color(&mut self, color: Color) {
         self.color = color;
     }
+
+    /* pub fn play_notes_from_file(&mut self, filename: PathBuf, rustbox: &Arc<Mutex<RustBox>>) { */
+    /*     let file_base_notes = NoteReader::from(filename); */
+
+    /*     for file_base_note in file_base_notes.parse_notes() { */
+    /*         let note = Note::from( */
+    /*             file_base_note.base_note.as_str(), */
+    /*             self.color, */
+    /*             file_base_note.duration, */
+    /*         ).unwrap(); */
+    /*         thread::sleep(file_base_note.delay); */
+    /*         self.play_note(note, &rustbox); */
+    /*     } */
+    /* } */
 
     pub fn process_key(&mut self, key: Key) -> Option<GameEvent> {
         let note = match key {
