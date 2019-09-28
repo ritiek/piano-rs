@@ -1,5 +1,4 @@
 use rustbox::{Color, RustBox};
-use clap::value_t;
 use std::default::Default;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -8,7 +7,7 @@ use std::net::SocketAddr;
 use std::io::Result;
 use std::path::PathBuf;
 
-use piano_rs::arguments;
+use piano_rs::arguments::Options;
 use piano_rs::game::{
     PianoKeyboard,
     GameEvent,
@@ -22,34 +21,16 @@ use piano_rs::network::{
 };
 
 fn main() -> Result<()> {
-    let matches = arguments::get_arguments();
+    let arguments = Options::read();
     // A workaround to stop cracking noise after note ends (issue #4)
     let blank_point = rodio::default_output_device().unwrap();
     let blank_sink = rodio::Sink::new(&blank_point);
     let blank_source = rodio::source::SineWave::new(0);
     blank_sink.append(blank_source);
 
-    let volume = value_t!(matches.value_of("volume"), f32).unwrap_or(1.0);
-    let mark_duration = value_t!(matches.value_of("markduration"), u64).unwrap_or(500);
-
-    let sequence = value_t!(matches.value_of("sequence"), i8).unwrap_or(2);
-    let sound_duration = value_t!(matches.value_of("noteduration"), u64).unwrap_or(0);
-
-    let bind_interface: &str = "0.0.0.0";
-
-    let receiver_port: u16 = 9999;
-    let receiver_addr: SocketAddr = format!("{}:{}", &bind_interface, &receiver_port)
-        .parse()
-        .unwrap();
-
-    let sender_port: u16 = 9998;
-    let sender_addr: SocketAddr = format!("{}:{}", &bind_interface, &sender_port)
-        .parse()
-        .unwrap();
-
-    let host_addr = value_t!(matches.value_of("host"), SocketAddr).unwrap_or(receiver_addr);
-    let event_receiver = Receiver::new(receiver_addr)?;
-    let event_sender = Arc::new(Mutex::new(Sender::new(sender_addr, host_addr)?));
+    let receiver_address = arguments.receiver_address;
+    let event_receiver = Receiver::new(receiver_address)?;
+    let event_sender = Arc::new(Mutex::new(Sender::new(arguments.sender_address, arguments.host_address)?));
     let event_sender_clone = event_sender.clone();
 
     let rustbox = Arc::new(Mutex::new(
@@ -57,10 +38,10 @@ fn main() -> Result<()> {
     ));
 
     let keyboard = Arc::new(Mutex::new(PianoKeyboard::new(
-        sequence,
-        volume,
-        Duration::from_millis(sound_duration),
-        Duration::from_millis(mark_duration),
+        arguments.sequence,
+        arguments.volume,
+        Duration::from_millis(arguments.note_duration),
+        Duration::from_millis(arguments.mark_duration),
         Color::Blue,
     )));
 
@@ -73,17 +54,16 @@ fn main() -> Result<()> {
         loop {
             let data = event_receiver.poll_event().unwrap();
             match data.event {
-                NetworkEvent::PlayerJoin => {
-                    let remote_receiver_addr: SocketAddr = format!("{}:9999", data.src.ip())
+                NetworkEvent::PlayerJoin(port) => {
+                    let remote_receiver_addr: SocketAddr = format!("{}:{}", data.src.ip(), port)
                         .parse()
                         .unwrap();
-
                     event_sender_clone.lock().unwrap()
-                        .register_remote_socket(remote_receiver_addr)
+                        .register_remote_socket(receiver_address.port(), remote_receiver_addr)
                         .unwrap();
                 }
-                NetworkEvent::Peers(mut peers) => {
-                    peers[0] = format!("{}:9999", data.src.ip()).parse().unwrap();
+                NetworkEvent::Peers(port, mut peers) => {
+                    peers[0] = format!("{}:{}", data.src.ip(), port).parse().unwrap();
                     event_sender_clone.lock().unwrap().peer_addrs = peers;
                 }
                 NetworkEvent::ID(id) => {
@@ -105,14 +85,14 @@ fn main() -> Result<()> {
         }
     });
 
-    event_sender.lock().unwrap().register_self()?;
+    event_sender.lock().unwrap().register_self(arguments.receiver_address.port())?;
 
-    if let Some(v) = matches.value_of("record") {
+    if let Some(v) = arguments.record_file {
         keyboard.lock().unwrap().set_record_file(PathBuf::from(v));
     }
 
-    if let Some(playfile) = matches.value_of("play") {
-        let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0);
+    if let Some(playfile) = arguments.play_file {
+        let tempo = arguments.play_file_tempo;
         let file_base_notes = NoteReader::from(PathBuf::from(playfile));
         let color = keyboard.lock().unwrap().color;
         let file_notes_sender = event_sender.clone();

@@ -6,9 +6,9 @@ pub use crate::game::{Note, GameEvent};
 pub enum NetworkEvent {
     ID(usize),
     Note(Note),
-    Peers(Vec<SocketAddr>),
-    PlayerJoin,
-    PlayerLeft,
+    Peers(u16, Vec<SocketAddr>),
+    PlayerJoin(u16),
+    PlayerLeft(u16),
 }
 
 #[derive(Debug)]
