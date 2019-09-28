@@ -28,7 +28,8 @@ fn main() -> Result<()> {
     let blank_source = rodio::source::SineWave::new(0);
     blank_sink.append(blank_source);
 
-    let event_receiver = Receiver::new(arguments.receiver_address)?;
+    let receiver_address = arguments.receiver_address;
+    let event_receiver = Receiver::new(receiver_address)?;
     let event_sender = Arc::new(Mutex::new(Sender::new(arguments.sender_address, arguments.host_address)?));
     let event_sender_clone = event_sender.clone();
 
@@ -53,17 +54,16 @@ fn main() -> Result<()> {
         loop {
             let data = event_receiver.poll_event().unwrap();
             match data.event {
-                NetworkEvent::PlayerJoin => {
-                    let remote_receiver_addr: SocketAddr = format!("{}:9999", data.src.ip())
+                NetworkEvent::PlayerJoin(port) => {
+                    let remote_receiver_addr: SocketAddr = format!("{}:{}", data.src.ip(), port)
                         .parse()
                         .unwrap();
-
                     event_sender_clone.lock().unwrap()
-                        .register_remote_socket(remote_receiver_addr)
+                        .register_remote_socket(receiver_address.port(), remote_receiver_addr)
                         .unwrap();
                 }
-                NetworkEvent::Peers(mut peers) => {
-                    peers[0] = format!("{}:9999", data.src.ip()).parse().unwrap();
+                NetworkEvent::Peers(port, mut peers) => {
+                    peers[0] = format!("{}:{}", data.src.ip(), port).parse().unwrap();
                     event_sender_clone.lock().unwrap().peer_addrs = peers;
                 }
                 NetworkEvent::ID(id) => {
@@ -85,7 +85,7 @@ fn main() -> Result<()> {
         }
     });
 
-    event_sender.lock().unwrap().register_self()?;
+    event_sender.lock().unwrap().register_self(arguments.receiver_address.port())?;
 
     if let Some(v) = arguments.record_file {
         keyboard.lock().unwrap().set_record_file(PathBuf::from(v));

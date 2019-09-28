@@ -19,25 +19,25 @@ impl Sender {
         })
     }
 
-    pub fn register_self(&self) -> Result<()> {
-        let bytes = bincode::serialize(&types::NetworkEvent::PlayerJoin).unwrap();
+    pub fn register_self(&self, receiver_port: u16) -> Result<()> {
+        let bytes = bincode::serialize(&types::NetworkEvent::PlayerJoin(receiver_port)).unwrap();
         self.socket.send_to(&bytes, self.host_addr)?;
         Ok(())
     }
 
-    pub fn register_remote_socket(&mut self, addr: SocketAddr) -> Result<()> {
-        if !self.peer_addrs.contains(&addr) {
-            self.peer_addrs.push(addr);
+    pub fn register_remote_socket(&mut self, receiver_port: u16, client_addr: SocketAddr) -> Result<()> {
+        if !self.peer_addrs.contains(&client_addr) {
+            self.peer_addrs.push(client_addr);
         }
 
         let id = self.peer_addrs
             .iter()
-            .position(|&peer_addr| peer_addr == addr).unwrap();
+            .position(|&peer_addr| peer_addr == client_addr).unwrap();
         let id_bytes = bincode::serialize(&types::NetworkEvent::ID(id)).unwrap();
-        self.socket.send_to(&id_bytes, addr)?;
+        self.socket.send_to(&id_bytes, client_addr)?;
 
         let peer_addrs_clone = self.peer_addrs.clone();
-        let peer_addrs_bytes = bincode::serialize(&types::NetworkEvent::Peers(peer_addrs_clone)).unwrap();
+        let peer_addrs_bytes = bincode::serialize(&types::NetworkEvent::Peers(receiver_port, peer_addrs_clone)).unwrap();
         for peer_addr in self.peer_addrs.iter() {
             self.socket.send_to(&peer_addrs_bytes, peer_addr)?;
         }
