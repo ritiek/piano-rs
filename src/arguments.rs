@@ -41,7 +41,7 @@ impl Options {
                                 .unwrap_or(500),
             receiver_address : receiver_address,
             sender_address   : value_t!(arguments.value_of("sender_address"), SocketAddr)
-                                .unwrap_or("0.0.0.0:9999".parse().unwrap()),
+                                .unwrap_or("0.0.0.0:9998".parse().unwrap()),
         };
 
         parsed_arguments
