@@ -1,11 +1,14 @@
 pub mod screen;
 pub mod notes;
+pub mod notes_file;
 
 use rustbox::{Color, RustBox, Key};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use std::path::PathBuf;
 pub use notes::Note;
 pub use notes::Player;
+pub use notes_file::{NoteReader, FileNote, NoteRecorder};
 use screen::pianokeys;
 use serde_derive::{Serialize, Deserialize};
 
@@ -15,19 +18,20 @@ pub enum GameEvent {
     Quit,
 }
 
-#[derive(Clone)]
 pub struct PianoKeyboard {
     sequence: i8,
     volume: f32,
     sound_duration: Duration,
     mark_duration: Duration,
-    color: Color,
+    pub color: Color,
     player: Player,
+    recorder: NoteRecorder,
 }
 
 impl PianoKeyboard {
     pub fn new(sequence: i8, volume: f32, sound_duration: Duration, mark_duration: Duration, color: Color) -> PianoKeyboard {
         let player = Player::new();
+
         PianoKeyboard {
             sequence: sequence,
             volume: volume,
@@ -35,14 +39,19 @@ impl PianoKeyboard {
             mark_duration: mark_duration,
             color: color,
             player: player,
+            recorder: NoteRecorder::new(),
         }
+    }
+
+    pub fn set_record_file(&mut self, record_file: PathBuf) {
+        self.recorder.set_file(record_file);
     }
 
     pub fn draw(&self, rustbox: &Arc<Mutex<RustBox>>) {
         pianokeys::draw(rustbox);
     }
 
-    pub fn play_note(&self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {
+    pub fn play_note(&mut self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {
         note.play(&self.player, self.volume);
 
         screen::mark_note(
@@ -52,11 +61,29 @@ impl PianoKeyboard {
             self.mark_duration,
             &rustbox,
         );
+
+        if let Some(_) = &self.recorder.record_file {
+            self.recorder.write_note(note);
+        }
     }
 
     pub fn set_note_color(&mut self, color: Color) {
         self.color = color;
     }
+
+    /* pub fn play_notes_from_file(&mut self, filename: PathBuf, rustbox: &Arc<Mutex<RustBox>>) { */
+    /*     let file_base_notes = NoteReader::from(filename); */
+
+    /*     for file_base_note in file_base_notes.parse_notes() { */
+    /*         let note = Note::from( */
+    /*             file_base_note.base_note.as_str(), */
+    /*             self.color, */
+    /*             file_base_note.duration, */
+    /*         ).unwrap(); */
+    /*         thread::sleep(file_base_note.delay); */
+    /*         self.play_note(note, &rustbox); */
+    /*     } */
+    /* } */
 
     pub fn process_key(&mut self, key: Key) -> Option<GameEvent> {
         let note = match key {

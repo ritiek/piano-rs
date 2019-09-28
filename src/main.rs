@@ -2,14 +2,18 @@ use rustbox::{Color, RustBox};
 use clap::value_t;
 use std::default::Default;
 use std::sync::{Arc, Mutex};
-use std::{thread, time};
+use std::thread;
+use std::time::Duration;
 use std::net::SocketAddr;
 use std::io::Result;
+use std::path::PathBuf;
 
 use piano_rs::arguments;
 use piano_rs::game::{
     PianoKeyboard,
     GameEvent,
+    Note,
+    NoteReader,
 };
 use piano_rs::network::{
     NetworkEvent,
@@ -28,16 +32,8 @@ fn main() -> Result<()> {
     let volume = value_t!(matches.value_of("volume"), f32).unwrap_or(1.0);
     let mark_duration = value_t!(matches.value_of("markduration"), u64).unwrap_or(500);
 
-    /* if let Some(playfile) = matches.value_of("play") { */
-    /*     let replaycolor = matches.value_of("replaycolor").unwrap_or("blue"); */
-    /*     let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0); */
-    /*     /1* play::play_from_file(playfile, replaycolor, *1/ */
-    /*                          /1* mark_duration, volume, tempo, &rustbox); *1/ */
-    /* } */
-
     let sequence = value_t!(matches.value_of("sequence"), i8).unwrap_or(2);
     let sound_duration = value_t!(matches.value_of("noteduration"), u64).unwrap_or(0);
-    /* let record_file = matches.value_of("record"); */
 
     let bind_interface: &str = "0.0.0.0";
 
@@ -63,8 +59,8 @@ fn main() -> Result<()> {
     let keyboard = Arc::new(Mutex::new(PianoKeyboard::new(
         sequence,
         volume,
-        time::Duration::from_millis(sound_duration),
-        time::Duration::from_millis(mark_duration),
+        Duration::from_millis(sound_duration),
+        Duration::from_millis(mark_duration),
         Color::Blue,
     )));
 
@@ -111,7 +107,34 @@ fn main() -> Result<()> {
 
     event_sender.lock().unwrap().register_self()?;
 
-    let duration = time::Duration::from_nanos(1000);
+    if let Some(v) = matches.value_of("record") {
+        keyboard.lock().unwrap().set_record_file(PathBuf::from(v));
+    }
+
+    if let Some(playfile) = matches.value_of("play") {
+        let tempo = value_t!(matches.value_of("tempo"), f32).unwrap_or(1.0);
+        let file_base_notes = NoteReader::from(PathBuf::from(playfile));
+        let color = keyboard.lock().unwrap().color;
+        let file_notes_sender = event_sender.clone();
+
+        thread::spawn(move || {
+            for file_base_note in file_base_notes.parse_notes() {
+                let note = Note::from(
+                    file_base_note.base_note.as_str(),
+                    color,
+                    file_base_note.duration,
+                ).unwrap();
+                let normalized_delay = Duration::from_millis(
+                    (file_base_note.delay.as_millis() as f32 / tempo) as u64
+                );
+                thread::sleep(normalized_delay);
+                file_notes_sender.lock().unwrap().tick(note).unwrap();
+            }
+        });
+    }
+
+
+    let duration = Duration::from_nanos(1000);
     loop {
         let event = rustbox.lock().unwrap().peek_event(duration, false);
         match event {
