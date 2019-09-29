@@ -20,6 +20,81 @@ use piano_rs::network::{
     Sender,
 };
 
+fn handle_network_receive_event(
+    receiver_address: SocketAddr,
+    keyboard: &Arc<Mutex<PianoKeyboard>>,
+    rustbox: &Arc<Mutex<RustBox>>,
+    event_sender: &Arc<Mutex<Sender>>,
+    event_receiver: &Receiver,
+) {
+    let data = event_receiver.poll_event().unwrap();
+    match data.event {
+        NetworkEvent::PlayerJoin(port) => {
+            let remote_receiver_addr: SocketAddr = format!("{}:{}", data.src.ip(), port)
+                .parse()
+                .unwrap();
+            event_sender.lock().unwrap()
+                .register_remote_socket(receiver_address.port(), remote_receiver_addr)
+                .unwrap();
+        }
+        NetworkEvent::Peers(port, mut peers) => {
+            peers[0] = format!("{}:{}", data.src.ip(), port).parse().unwrap();
+            event_sender.lock().unwrap().peer_addrs = peers;
+        }
+        NetworkEvent::ID(id) => {
+            keyboard.lock().unwrap().set_note_color(match id {
+                0 => Color::Blue,
+                1 => Color::Red,
+                2 => Color::Green,
+                3 => Color::Yellow,
+                4 => Color::Cyan,
+                5 => Color::Magenta,
+                _ => Color::Black,
+            });
+        }
+        NetworkEvent::Note(note) => {
+            keyboard.lock().unwrap().play_note(note, &rustbox);
+        }
+       _ => { },
+    }
+}
+
+fn game_loop(rustbox: &Arc<Mutex<RustBox>>, keyboard: &Arc<Mutex<PianoKeyboard>>, event_sender: &Arc<Mutex<Sender>>) {
+    let duration = Duration::from_nanos(1000);
+    loop {
+        let event = rustbox.lock().unwrap().peek_event(duration, false);
+        match event {
+            Ok(rustbox::Event::KeyEvent(key)) => {
+                match keyboard.lock().unwrap().process_key(key) {
+                    Some(GameEvent::Note(note)) => {
+                        event_sender.lock().unwrap().tick(note).unwrap();
+                    }
+                    Some(GameEvent::Quit) => break,
+                    None => { },
+                };
+            }
+            Err(e) => panic!("{}", e),
+            _ => { },
+        }
+    }
+}
+
+fn play_from_file(play_file: PathBuf, tempo: f32, keyboard: &Arc<Mutex<PianoKeyboard>>, event_sender: &Arc<Mutex<Sender>>) {
+    let file_base_notes = NoteReader::from(play_file);
+    for file_base_note in file_base_notes.parse_notes() {
+        let note = Note::from(
+            file_base_note.base_note.as_str(),
+            keyboard.lock().unwrap().color,
+            file_base_note.duration,
+        ).unwrap();
+        let normalized_delay = Duration::from_millis(
+            (file_base_note.delay.as_millis() as f32 / tempo) as u64
+        );
+        thread::sleep(normalized_delay);
+        event_sender.lock().unwrap().tick(note).unwrap();
+    }
+}
+
 fn main() -> Result<()> {
     let arguments = Options::read();
 
@@ -47,36 +122,13 @@ fn main() -> Result<()> {
 
     thread::spawn(move || {
         loop {
-            let data = event_receiver.poll_event().unwrap();
-            match data.event {
-                NetworkEvent::PlayerJoin(port) => {
-                    let remote_receiver_addr: SocketAddr = format!("{}:{}", data.src.ip(), port)
-                        .parse()
-                        .unwrap();
-                    event_sender_clone.lock().unwrap()
-                        .register_remote_socket(receiver_address.port(), remote_receiver_addr)
-                        .unwrap();
-                }
-                NetworkEvent::Peers(port, mut peers) => {
-                    peers[0] = format!("{}:{}", data.src.ip(), port).parse().unwrap();
-                    event_sender_clone.lock().unwrap().peer_addrs = peers;
-                }
-                NetworkEvent::ID(id) => {
-                    cloneboard.lock().unwrap().set_note_color(match id {
-                        0 => Color::Blue,
-                        1 => Color::Red,
-                        2 => Color::Green,
-                        3 => Color::Yellow,
-                        4 => Color::Cyan,
-                        5 => Color::Magenta,
-                        _ => Color::Black,
-                    });
-                }
-                NetworkEvent::Note(note) => {
-                    cloneboard.lock().unwrap().play_note(note, &clonebox);
-                }
-               _ => { },
-            }
+            handle_network_receive_event(
+                receiver_address,
+                &cloneboard,
+                &clonebox,
+                &event_sender_clone,
+                &event_receiver
+            );
         }
     });
 
@@ -86,46 +138,20 @@ fn main() -> Result<()> {
         keyboard.lock().unwrap().set_record_file(PathBuf::from(v));
     }
 
-    if let Some(playfile) = arguments.play_file {
+    if let Some(v) = arguments.play_file {
+        let play_file = PathBuf::from(v);
         let tempo = arguments.play_file_tempo;
-        let file_base_notes = NoteReader::from(PathBuf::from(playfile));
-        let color = keyboard.lock().unwrap().color;
+        let fileboard = keyboard.clone();
         let file_notes_sender = event_sender.clone();
-
-        thread::spawn(move || {
-            for file_base_note in file_base_notes.parse_notes() {
-                let note = Note::from(
-                    file_base_note.base_note.as_str(),
-                    color,
-                    file_base_note.duration,
-                ).unwrap();
-                let normalized_delay = Duration::from_millis(
-                    (file_base_note.delay.as_millis() as f32 / tempo) as u64
-                );
-                thread::sleep(normalized_delay);
-                file_notes_sender.lock().unwrap().tick(note).unwrap();
-            }
-        });
+        thread::spawn(move || play_from_file(
+            play_file,
+            tempo,
+            &fileboard,
+            &file_notes_sender
+        ));
     }
 
+    game_loop(&rustbox, &keyboard, &event_sender);
 
-    let duration = Duration::from_nanos(1000);
-    loop {
-        let event = rustbox.lock().unwrap().peek_event(duration, false);
-        match event {
-            Ok(rustbox::Event::KeyEvent(key)) => {
-                match keyboard.lock().unwrap().process_key(key) {
-                    Some(GameEvent::Note(note)) => {
-                        event_sender.lock().unwrap().tick(note).unwrap();
-                    }
-                    Some(GameEvent::Quit) => break,
-                    None => { },
-                };
-            }
-            Err(e) => panic!("{}", e),
-            _ => { },
-        }
-    }
     Ok(())
 }
-
