@@ -71,20 +71,6 @@ impl PianoKeyboard {
         self.color = color;
     }
 
-    /* pub fn play_notes_from_file(&mut self, filename: PathBuf, rustbox: &Arc<Mutex<RustBox>>) { */
-    /*     let file_base_notes = NoteReader::from(filename); */
-
-    /*     for file_base_note in file_base_notes.parse_notes() { */
-    /*         let note = Note::from( */
-    /*             file_base_note.base_note.as_str(), */
-    /*             self.color, */
-    /*             file_base_note.duration, */
-    /*         ).unwrap(); */
-    /*         thread::sleep(file_base_note.delay); */
-    /*         self.play_note(note, &rustbox); */
-    /*     } */
-    /* } */
-
     pub fn process_key(&mut self, key: Key) -> Option<GameEvent> {
         let note = match key {
             Key::Right => {
@@ -151,6 +137,7 @@ mod test {
         Duration,
         GameEvent,
         Note,
+        NoteRecorder,
     };
 
     #[test]
@@ -170,6 +157,7 @@ mod test {
             mark_duration: Duration::from_millis(500),
             color: Color::Blue,
             player: Player::new(),
+            recorder: NoteRecorder::new(),
         };
 
         assert_eq!(actual_keyboard.sequence, expected_keyboard.sequence);
