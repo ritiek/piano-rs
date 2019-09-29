@@ -22,11 +22,6 @@ use piano_rs::network::{
 
 fn main() -> Result<()> {
     let arguments = Options::read();
-    // A workaround to stop cracking noise after note ends (issue #4)
-    let blank_point = rodio::default_output_device().unwrap();
-    let blank_sink = rodio::Sink::new(&blank_point);
-    let blank_source = rodio::source::SineWave::new(0);
-    blank_sink.append(blank_source);
 
     let receiver_address = arguments.receiver_address;
     let event_receiver = Receiver::new(receiver_address)?;
