@@ -115,6 +115,26 @@ Here, 192.168.1.3 is the IP address of the 1st machine.
 The 2nd machine should now be connected and will share the same piano-rs session as the host machine.
 Any keys you hit, should be marked with a different color indicator.
 
+Similar to the way you connected the 2nd machine, you can connect any number of machines to share
+the same piano-rs session!
+
+--------------------
+
+**NOTE:** These multiplayer features do not make use of tokio-rs runtime and instead use `std::net::UdpSocket`
+for communication, which comes included with the Rust standard library. The major limitation of relying on
+`std::net::UdpSocket` is that the network requests are handled sequentially on the basis of first come,
+first serve. This would be a problem if hundreds of players are connected to the same piano-rs session and
+are hitting the keys at the same time. Obviously, we could acheive much better performance if we were to
+handle network requests asynchronously with [tokio-rs](https://github.com/tokio-rs/tokio) and
+[futures](https://docs.rs/futures/0.1.29/futures/). Unfortunately, these awesome libraries
+have a bit of learning curve which I don't have the time to go through at the moment! It will be awesome if
+someone would like to help here make a transition to asynchronously handle network requests.
+
+The cool devs at tokio-rs have also been trying to lower the learning curve by introducing `async` and `await`
+keywords, similar to [Python](https://docs.python.org/3/library/asyncio.html). However, these keywords at the
+moment are only available under the recent alpha release of tokio-rs for Rust nightly. See the relevant
+[blog post](https://tokio.rs/blog/2019-08-alphas/).
+
 ## Running tests
 
 ```
@@ -123,15 +143,15 @@ $ cargo test
 
 ## Resources
 
-- piano-rs uses the same note sounds and key bindings as [multiplayerpiano.com](http://multiplayerpiano.com).
+- piano-rs uses the same note sounds and key bindings as [multiplayerpiano](http://multiplayerpiano.com).
   In fact, the note sound files you see in the [assets](https://github.com/ritiek/piano-rs/tree/master/assets)
-  sub-directory are downloaded from [multiplayerpiano.com](http://multiplayerpiano.com) itself.
-  If you're a moderator on their website and have a problem with this, let me know and I'll remove and
+  sub-directory are downloaded from multiplayerpiano itself.
+  If you're a moderator on their website and got a problem with this, let me know and I'll remove and
   stop using the sound files in this repository.
 
 - You can use this [paste](https://pastebin.com/CX1ew0uB) to learn to play some popular songs. If you're
-  interested, I've *transcribed* a few synthesia videos from YouTube so they can be played with piano-rs
-  [in this gist](https://gist.github.com/ritiek/28be91b64ef82f0ff8599c1037e1e05e).
+  interested, I've *transcribed* a few synthesia YouTube videos [in this gist](https://gist.github.com/ritiek/28be91b64ef82f0ff8599c1037e1e05e),
+  so they can be played with piano-rs.
 
 ## License
 
