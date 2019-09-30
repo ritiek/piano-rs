@@ -41,7 +41,7 @@ impl Options {
                                 .unwrap_or(500),
             receiver_address : receiver_address,
             sender_address   : value_t!(arguments.value_of("sender_address"), SocketAddr)
-                                .unwrap_or("0.0.0.0:9998".parse().unwrap()),
+                                .unwrap_or("0.0.0.0:0".parse().unwrap()),
         };
 
         parsed_arguments
@@ -118,7 +118,7 @@ impl Options {
                 .long("sender-address")
                 .value_name("ADDRESS")
                 .takes_value(true)
-                .help("Set the IP Address and Port to which the sender socket will bind to (Default: 0.0.0.0:9998)"))
+                .help("Set the IP Address and Port to which the sender socket will bind to. A port of 0 implies to bind on a random unused port (Default: 0.0.0.0:0)"))
 
             .get_matches()
     }
