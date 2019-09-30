@@ -2,7 +2,7 @@ use serde_derive::{Serialize, Deserialize};
 use std::net::SocketAddr;
 pub use crate::game::{Note, GameEvent};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum NetworkEvent {
     ID(usize),
     Note(Note),
@@ -11,7 +11,7 @@ pub enum NetworkEvent {
     PlayerLeft(u16),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct NetworkData {
     pub amt: usize,
     pub src: SocketAddr,

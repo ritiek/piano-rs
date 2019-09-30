@@ -21,7 +21,6 @@ use piano_rs::network::{
 };
 
 fn handle_network_receive_event(
-    receiver_address: SocketAddr,
     keyboard: &Arc<Mutex<PianoKeyboard>>,
     rustbox: &Arc<Mutex<RustBox>>,
     event_sender: &Arc<Mutex<Sender>>,
@@ -33,8 +32,11 @@ fn handle_network_receive_event(
             let remote_receiver_addr: SocketAddr = format!("{}:{}", data.src.ip(), port)
                 .parse()
                 .unwrap();
+
             event_sender.lock().unwrap()
-                .register_remote_socket(receiver_address.port(), remote_receiver_addr)
+                .register_remote_socket(
+                    event_receiver.socket.local_addr().unwrap().port(), remote_receiver_addr
+                )
                 .unwrap();
         }
         NetworkEvent::Peers(port, mut peers) => {
@@ -123,7 +125,6 @@ fn main() -> Result<()> {
     thread::spawn(move || {
         loop {
             handle_network_receive_event(
-                receiver_address,
                 &cloneboard,
                 &clonebox,
                 &event_sender_clone,

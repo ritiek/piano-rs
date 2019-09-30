@@ -5,7 +5,7 @@ use crate::network::types;
 
 #[derive(Debug)]
 pub struct Receiver {
-    socket: UdpSocket,
+    pub socket: UdpSocket,
 }
 
 impl Receiver {
