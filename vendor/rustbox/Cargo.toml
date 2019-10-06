@@ -1,0 +1,26 @@
+[package]
+name = "rustbox"
+version = "0.11.0"
+authors = ["Greg Chapple <gregchapple1@gmail.com>"]
+description = "A rust implementation of the termbox library"
+repository = "https://github.com/gchp/rustbox"
+homepage = "https://github.com/gchp/rustbox"
+readme = "README.md"
+license = "MIT"
+keywords = [
+    "termbox",
+    "terminal",
+    "gui",
+]
+exclude = [
+    "examples/*"
+]
+
+[lib]
+name = "rustbox"
+
+[dependencies]
+bitflags = "0.2.1"
+termbox-sys = { version = "0.2.11", path = "../termbox-sys" }
+gag = "0.1.6"
+num-traits = "0.1.13"

@@ -1,0 +1,19 @@
+[package]
+
+name = "termbox-sys"
+version = "0.2.11"
+authors = [
+    "Greg Chapple <gregchapple1@gmail.com>",
+    "Tom Jakubowski <tom@crystae.net>"
+]
+
+links = "termbox"
+build = "build.rs"
+license = "MIT"
+description = "Low level bindings for the termbox library"
+repository = "https://github.com/gchp/termbox-sys"
+homepage = "https://github.com/gchp/termbox-sys"
+
+[lib]
+name = "termbox_sys"
+path = "lib.rs"

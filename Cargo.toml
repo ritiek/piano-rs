@@ -16,7 +16,7 @@ serde_derive = "1.0"
 serde = "1.0"
 clap = "2.33"
 rodio = "0.9"
-rustbox = "0.11"
+rustbox = { version = "0.11", path = "vendor/rustbox" }
 yaml-rust = "0.4"
 
 [[bin]]
