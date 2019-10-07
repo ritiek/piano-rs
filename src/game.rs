@@ -109,19 +109,9 @@ impl PianoKeyboard {
             Key::Esc => {
                 Some(GameEvent::Quit)
             }
-            _ => {
-                let base_note = notes::key_to_base_note(key, self.sequence);
-
-                let note = match base_note {
-                    Some(v) => Note::from(&v, self.color, self.sound_duration),
-                    None => None,
-                };
-
-                match note {
-                    Some(v) => Some(GameEvent::Note(v)),
-                    None => None,
-                }
-            }
+            _ => notes::key_to_base_note(key, self.sequence)
+                .and_then(|note| Note::from(&note, self.color, self.sound_duration))
+                .map(GameEvent::Note),
         };
         note
     }
