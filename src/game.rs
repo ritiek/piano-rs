@@ -10,7 +10,7 @@ pub use notes::Player;
 pub use notes_file::{NoteReader, FileNote, NoteRecorder};
 use screen::pianokeys;
 use serde_derive::{Serialize, Deserialize};
-use crossterm::Result;
+use crossterm::{KeyEvent, Result};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum GameEvent {
@@ -71,50 +71,56 @@ impl PianoKeyboard {
         self.color = color;
     }
 
-    pub fn process_key(&mut self, key: char) -> Option<GameEvent> {
-        let note = match key {
-            Key::Right => {
-                if self.sequence < 6 {
-                    self.sequence += 1;
-                }
-                None
-            }
-            Key::Left => {
-                if self.sequence > 0 {
-                    self.sequence -= 1;
-                }
-                None
-            }
-            Key::Up => {
-                // The note sound files are maximum 8s in length
-                if self.sound_duration < Duration::from_millis(8000) {
-                    self.sound_duration += Duration::from_millis(50);
-                }
-                None
-            }
-            Key::Down => {
-                if self.sound_duration > Duration::new(0, 0) {
-                    self.sound_duration -= Duration::from_millis(50);
-                }
-                None
-            }
-            Key::Char('+') => {
-                self.volume += 0.1;
-                None
-            }
-            Key::Char('-') => {
-                self.volume -= 0.1;
-                None
-            }
-            Key::Esc => {
-                Some(GameEvent::Quit)
-            }
-            _ => notes::key_to_base_note(key, self.sequence)
-                .and_then(|note| Note::from(&note, self.color, self.sound_duration))
-                .map(GameEvent::Note),
-        };
-        note
+    pub fn process_key(&mut self, key: KeyEvent) -> Option<GameEvent> {
+        println!("{:?}", key);
+        None
     }
+
+    /* pub fn process_key(&mut self, key: KeyEvent) -> Option<GameEvent> { */
+    /*     let note = match key { */
+    /*         Key::Right => { */
+    /*             if self.sequence < 6 { */
+    /*                 self.sequence += 1; */
+    /*             } */
+    /*             None */
+    /*         } */
+    /*         Key::Left => { */
+    /*             if self.sequence > 0 { */
+    /*                 self.sequence -= 1; */
+    /*             } */
+    /*             None */
+    /*         } */
+    /*         Key::Up => { */
+    /*             // The note sound files are maximum 8s in length */
+    /*             if self.sound_duration < Duration::from_millis(8000) { */
+    /*                 self.sound_duration += Duration::from_millis(50); */
+    /*             } */
+    /*             None */
+    /*         } */
+    /*         Key::Down => { */
+    /*             if self.sound_duration > Duration::new(0, 0) { */
+    /*                 self.sound_duration -= Duration::from_millis(50); */
+    /*             } */
+    /*             None */
+    /*         } */
+    /*         Key::Char('+') => { */
+    /*             self.volume += 0.1; */
+    /*             None */
+    /*         } */
+    /*         Key::Char('-') => { */
+    /*             self.volume -= 0.1; */
+    /*             None */
+    /*         } */
+    /*         Key::Esc => { */
+    /*             Some(GameEvent::Quit) */
+    /*         } */
+    /*         _ => notes::key_to_base_note(key, self.sequence) */
+    /*             .and_then(|note| Note::from(&note, self.color, self.sound_duration)) */
+    /*             .map(GameEvent::Note), */
+    /*     }; */
+    /*     note */
+    /* } */
+
 }
 
 #[cfg(test)]

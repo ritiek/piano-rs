@@ -1,6 +1,5 @@
-use rustbox::{Color, RustBox};
+use rustbox::Color;
 
-use std::default::Default;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -15,7 +14,7 @@ use crossterm::{
     Clear,
     ClearType,
     InputEvent,
-    KeyEvent,
+    /* KeyEvent, */
     SyncReader,
 };
 
@@ -72,13 +71,13 @@ fn handle_network_receive_event(
     }
 }
 
-fn game_loop(stdin: SyncReader, keyboard: &Arc<Mutex<PianoKeyboard>>, event_sender: &Arc<Mutex<Sender>>) {
+fn game_loop(stdin: &mut SyncReader, keyboard: &Arc<Mutex<PianoKeyboard>>, event_sender: &Arc<Mutex<Sender>>) {
     /* let duration = Duration::from_nanos(1000); */
 
     loop {
         if let Some(event) = stdin.next() {
             match event {
-                InputEvent::Keyboard(KeyEvent::Char(key)) => {
+                InputEvent::Keyboard(key) => {
                     match keyboard.lock().unwrap().process_key(key) {
                         Some(GameEvent::Note(note)) => {
                             event_sender.lock().unwrap().tick(note).unwrap();
@@ -86,8 +85,8 @@ fn game_loop(stdin: SyncReader, keyboard: &Arc<Mutex<PianoKeyboard>>, event_send
                         Some(GameEvent::Quit) => break,
                         None => { },
                     };
-                }
-                _ => { }
+                },
+                _ => { },
             }
         }
     }
@@ -116,10 +115,6 @@ fn main() -> Result<()> {
     let event_receiver = Receiver::new(receiver_address)?;
     let event_sender = Arc::new(Mutex::new(Sender::new(arguments.sender_address, arguments.host_address)?));
     let event_sender_clone = event_sender.clone();
-
-    let rustbox = Arc::new(Mutex::new(
-        RustBox::init(Default::default()).unwrap()
-    ));
 
     let crossterm = Crossterm::new();
     execute!(stdout(), Clear(ClearType::All)).unwrap();
@@ -172,7 +167,7 @@ fn main() -> Result<()> {
     /* input.enable_mouse_mode()?; */
     let mut sync_stdin = input.read_sync();
 
-    game_loop(sync_stdin, &keyboard, &event_sender);
+    game_loop(&mut sync_stdin, &keyboard, &event_sender);
 
     Ok(())
 }
