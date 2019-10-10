@@ -9,13 +9,12 @@ use crossterm::{
     execute,
     Crossterm,
     RawScreen,
-    Color,
     Clear,
     ClearType,
     InputEvent,
-    /* KeyEvent, */
     SyncReader,
 };
+use crossterm_style::Color;
 
 use piano_rs::arguments::Options;
 use piano_rs::game::{
@@ -119,7 +118,6 @@ fn main() -> Result<()> {
     execute!(stdout(), Clear(ClearType::All)).unwrap();
 
     let _raw = RawScreen::into_raw_mode();
-    crossterm.cursor().hide().unwrap();
 
     let keyboard = Arc::new(Mutex::new(PianoKeyboard::new(
         arguments.sequence,
@@ -166,6 +164,7 @@ fn main() -> Result<()> {
     /* input.enable_mouse_mode()?; */
     let mut sync_stdin = input.read_sync();
 
+    /* crossterm.cursor().hide().unwrap(); */
     game_loop(&mut sync_stdin, &keyboard, &event_sender);
 
     Ok(())

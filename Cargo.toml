@@ -18,6 +18,7 @@ clap = "2.33"
 rodio = "0.9"
 yaml-rust = "0.4"
 crossterm = "0.11.1"
+crossterm_style = { version = "0.5.1", features = ["serde"] }
 
 [[bin]]
 name = "piano-rs"

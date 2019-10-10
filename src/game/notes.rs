@@ -4,23 +4,9 @@ use std::num::ParseIntError;
 use std::convert::Infallible;
 use serde_derive::{Serialize, Deserialize};
 use std::time::Duration;
-use crossterm::{KeyEvent, Color};
+use crossterm::KeyEvent;
+use crossterm_style::Color;
 pub use play::Player;
-
-#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(remote = "Color")]
-pub enum ColorDef {
-    Black,
-    Red,
-    Green,
-    Yellow,
-    Blue,
-    Magenta,
-    Cyan,
-    White,
-    Byte(u16),
-    Default,
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Note {
@@ -29,7 +15,6 @@ pub struct Note {
     pub frequency: i8,
     pub position: i16,
     pub white: bool,
-    #[serde(with = "ColorDef")]
     pub color: Color,
     pub duration: Duration,
 }

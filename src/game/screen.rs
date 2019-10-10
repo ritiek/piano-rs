@@ -1,12 +1,14 @@
 use std::{thread, time};
 
 use crossterm::{
+    style,
     queue,
-    Color,
     Colorize,
     Goto,
     PrintStyledFont,
 };
+
+use crossterm_style::Color;
 
 use std::io::{stdout, Write};
 
@@ -111,16 +113,25 @@ pub mod pianokeys {
 
 pub fn mark_note(pos: i16, white: bool, color: Color, duration: time::Duration) {
     if white {
+        // This causes a compiler panic!
+        /* queue!( */
+        /*     stdout(), */
+        /*     Goto(pos as u16, 15), */
+        /*     PrintStyledFont(StyledObject("██").with(color)) */
+        /* ).unwrap(); */
+
         queue!(
             stdout(),
             Goto(pos as u16, 15),
-            PrintStyledFont("██".blue())
+            PrintStyledFont(style("██").with(color))
         ).unwrap();
+
+    /* println!("{} Red foreground text", Colored::Fg(Color::Red)); */
     } else {
         queue!(
             stdout(),
             Goto(pos as u16, 8),
-            PrintStyledFont("█".blue())
+            PrintStyledFont(style("█").with(color))
         ).unwrap();
     }
 

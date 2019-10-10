@@ -9,7 +9,8 @@ pub use notes::Player;
 pub use notes_file::{NoteReader, FileNote, NoteRecorder};
 use screen::pianokeys;
 use serde_derive::{Serialize, Deserialize};
-use crossterm::{KeyEvent, Color, Result};
+use crossterm::{KeyEvent, Result};
+use crossterm_style::Color;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum GameEvent {
