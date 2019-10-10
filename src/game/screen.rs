@@ -1,119 +1,145 @@
-use rustbox::{Color, RustBox};
-use std::sync::{Arc, Mutex};
 use std::{thread, time};
+
+use crossterm::{
+    queue,
+    execute,
+    Colorize,
+    Goto,
+    PrintStyledFont,
+};
+
+use std::io::{stdout, Stdout, Write};
+use rustbox::Color;
 
 /*
 █▒
 */
 
 pub mod pianokeys {
-    use rustbox::{Color, RustBox};
-    use std::sync::{Arc, Mutex};
+    use crossterm::{
+        queue,
+        execute,
+        Colorize,
+        Goto,
+        PrintStyledFont,
+        Result,
+    };
+
+    use std::io::{stdout, Stdout, Write};
 
     struct Point {
         x: u16,
         y: u16,
     }
 
-    pub fn draw(rustbox: &Arc<Mutex<RustBox>>) {
-        print_whites(rustbox);
-        print_blacks(rustbox);
-        rustbox.lock().unwrap().present();
+    pub fn draw() -> Result<()> {
+        let mut stdout = stdout();
+        print_whites(&mut stdout)?;
+        print_blacks(&mut stdout)?;
+        stdout.flush();
+        Ok(())
     }
 
-    fn print_whitekey(initial_point: Point, rustbox: &Arc<Mutex<RustBox>>) {
+    fn print_whitekey(initial_point: Point, stdout: &mut Stdout) -> Result<()> {
         let key_height: u16 = 16;
 
         for column_height in 0..key_height {
-            rustbox.lock().unwrap().print(
-                initial_point.x as usize,
-                (initial_point.y + column_height) as usize,
-                rustbox::RB_BOLD,
-                Color::Black,
-                Color::White,
-                "|",
-            );
-            rustbox.lock().unwrap().print(
-                (initial_point.x + 1) as usize,
-                (initial_point.y + column_height) as usize,
-                rustbox::RB_BOLD,
-                Color::White,
-                Color::Black,
-                "██",
-            );
-            rustbox.lock().unwrap().print(
-                (initial_point.x + 3) as usize,
-                (initial_point.y + column_height) as usize,
-                rustbox::RB_BOLD,
-                Color::Black,
-                Color::White,
-                "|",
-            );
+            queue!(
+                stdout,
+                Goto(initial_point.x, initial_point.y + column_height),
+                PrintStyledFont("|".black().on_white())
+            )?;
+            queue!(
+                stdout,
+                Goto(initial_point.x + 1, initial_point.y + column_height),
+                PrintStyledFont("██".white())
+            )?;
+            queue!(
+                stdout,
+                Goto(initial_point.x + 3, initial_point.y + column_height),
+                PrintStyledFont("|".black())
+            )?;
         }
+        Ok(())
     }
 
-    fn print_whites(rustbox: &Arc<Mutex<RustBox>>) {
+    fn print_whites(stdout: &mut Stdout) -> Result<()> {
         for key in 0..58 {
             let initial_point = Point { x: key * 3, y: 0 };
-            print_whitekey(initial_point, rustbox);
+            print_whitekey(initial_point, stdout)?;
         }
+        Ok(())
     }
 
-    fn print_blackkey(initial_point: Point, rustbox: &Arc<Mutex<RustBox>>) {
+    fn print_blackkey(initial_point: Point, stdout: &mut Stdout) -> Result<()> {
         let key_height = 9;
         for column_height in 0..key_height {
-            rustbox.lock().unwrap().print(
-                initial_point.x as usize,
-                (initial_point.y + column_height) as usize,
-                rustbox::RB_BOLD,
-                Color::Black,
-                Color::White,
-                "█",
-            );
+            queue!(
+                stdout,
+                Goto(initial_point.x, initial_point.y + column_height),
+                PrintStyledFont("█".black())
+            )?;
         }
+        Ok(())
     }
 
-    fn print_blacks(rustbox: &Arc<Mutex<RustBox>>) {
+    fn print_blacks(stdout: &mut Stdout) -> Result<()> {
         // First black key is lonely
         let mut initial_point = Point { x: 3, y: 0 };
-        print_blackkey(initial_point, rustbox);
+        print_blackkey(initial_point, stdout)?;
 
         for x in 0..8 {
             let g1k1 = x * 21 + 9;
             let g1k2 = g1k1 + 3;
             initial_point = Point { x: g1k1, y: 0 };
-            print_blackkey(initial_point, rustbox);
+            print_blackkey(initial_point, stdout)?;
             initial_point = Point { x: g1k2, y: 0 };
-            print_blackkey(initial_point, rustbox);
+            print_blackkey(initial_point, stdout)?;
 
             let g2k1 = g1k2 + 6;
             let g2k2 = g2k1 + 3;
             let g2k3 = g2k2 + 3;
             initial_point = Point { x: g2k1, y: 0 };
-            print_blackkey(initial_point, rustbox);
+            print_blackkey(initial_point, stdout)?;
             initial_point = Point { x: g2k2, y: 0 };
-            print_blackkey(initial_point, rustbox);
+            print_blackkey(initial_point, stdout)?;
             initial_point = Point { x: g2k3, y: 0 };
-            print_blackkey(initial_point, rustbox);
+            print_blackkey(initial_point, stdout)?;
         }
+
+        Ok(())
     }
 }
 
-pub fn mark_note(pos: i16, white: bool, color: Color, duration: time::Duration, rustbox: &Arc<Mutex<RustBox>>) {
+pub fn mark_note(pos: i16, white: bool, color: Color, duration: time::Duration) {
     if white {
-        rustbox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, color, Color::White, "▒▒");
+        queue!(
+            stdout(),
+            Goto(pos as u16, 15),
+            PrintStyledFont("██".blue())
+        ).unwrap();
     } else {
-        rustbox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, color, Color::White, "▒");
+        queue!(
+            stdout(),
+            Goto(pos as u16, 8),
+            PrintStyledFont("█".blue())
+        ).unwrap();
     }
 
-    rustbox.lock().unwrap().present();
-    let clonebox = rustbox.clone();
     thread::spawn(move || {
         thread::sleep(duration);
         if white {
-            clonebox.lock().unwrap().print(pos as usize, 15, rustbox::RB_BOLD, Color::White, Color::White, "▒▒");
+        queue!(
+            stdout(),
+            Goto(pos as u16, 15),
+            PrintStyledFont("██".white())
+        ).unwrap();
         } else {
-            clonebox.lock().unwrap().print(pos as usize, 8, rustbox::RB_BOLD, Color::Black, Color::White, "▒");
+        queue!(
+            stdout(),
+            Goto(pos as u16, 8),
+            PrintStyledFont("█".black())
+        ).unwrap();
         }
     });
 }

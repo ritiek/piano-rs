@@ -18,6 +18,7 @@ clap = "2.33"
 rodio = "0.9"
 rustbox = { version = "0.11", path = "vendor/rustbox" }
 yaml-rust = "0.4"
+crossterm = "0.11.1"
 
 [[bin]]
 name = "piano-rs"

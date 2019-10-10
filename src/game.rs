@@ -48,7 +48,7 @@ impl PianoKeyboard {
     }
 
     pub fn draw(&self, rustbox: &Arc<Mutex<RustBox>>) {
-        pianokeys::draw(rustbox);
+        pianokeys::draw();
     }
 
     pub fn play_note(&mut self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {
@@ -59,7 +59,6 @@ impl PianoKeyboard {
             note.white,
             note.color,
             self.mark_duration,
-            &rustbox,
         );
 
         if let Some(_) = &self.recorder.record_file {

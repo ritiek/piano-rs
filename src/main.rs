@@ -62,9 +62,10 @@ fn handle_network_receive_event(
 }
 
 fn game_loop(rustbox: &Arc<Mutex<RustBox>>, keyboard: &Arc<Mutex<PianoKeyboard>>, event_sender: &Arc<Mutex<Sender>>) {
-    let duration = Duration::from_nanos(1000);
+    /* let duration = Duration::from_nanos(1000); */
     loop {
-        let event = rustbox.lock().unwrap().peek_event(duration, false);
+        /* let event = rustbox.lock().unwrap().peek_event(duration, false); */
+        let event = rustbox.lock().unwrap().poll_event(false);
         match event {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 match keyboard.lock().unwrap().process_key(key) {
