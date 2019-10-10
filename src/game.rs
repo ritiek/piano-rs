@@ -2,8 +2,7 @@ pub mod screen;
 pub mod notes;
 pub mod notes_file;
 
-use rustbox::{Color, RustBox, Key};
-use std::sync::{Arc, Mutex};
+use rustbox::{Color, Key};
 use std::time::Duration;
 use std::path::PathBuf;
 pub use notes::Note;
@@ -11,6 +10,7 @@ pub use notes::Player;
 pub use notes_file::{NoteReader, FileNote, NoteRecorder};
 use screen::pianokeys;
 use serde_derive::{Serialize, Deserialize};
+use crossterm::Result;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum GameEvent {
@@ -47,11 +47,12 @@ impl PianoKeyboard {
         self.recorder.set_file(record_file);
     }
 
-    pub fn draw(&self, rustbox: &Arc<Mutex<RustBox>>) {
-        pianokeys::draw();
+    pub fn draw(&self) -> Result<()> {
+        pianokeys::draw()?;
+        Ok(())
     }
 
-    pub fn play_note(&mut self, note: Note, rustbox: &Arc<Mutex<RustBox>>) {
+    pub fn play_note(&mut self, note: Note) {
         note.play(&self.player, self.volume);
 
         screen::mark_note(
@@ -70,7 +71,7 @@ impl PianoKeyboard {
         self.color = color;
     }
 
-    pub fn process_key(&mut self, key: Key) -> Option<GameEvent> {
+    pub fn process_key(&mut self, key: char) -> Option<GameEvent> {
         let note = match key {
             Key::Right => {
                 if self.sequence < 6 {

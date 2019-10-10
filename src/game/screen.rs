@@ -2,13 +2,12 @@ use std::{thread, time};
 
 use crossterm::{
     queue,
-    execute,
     Colorize,
     Goto,
     PrintStyledFont,
 };
 
-use std::io::{stdout, Stdout, Write};
+use std::io::{stdout, Write};
 use rustbox::Color;
 
 /*
@@ -18,7 +17,6 @@ use rustbox::Color;
 pub mod pianokeys {
     use crossterm::{
         queue,
-        execute,
         Colorize,
         Goto,
         PrintStyledFont,
@@ -36,7 +34,7 @@ pub mod pianokeys {
         let mut stdout = stdout();
         print_whites(&mut stdout)?;
         print_blacks(&mut stdout)?;
-        stdout.flush();
+        stdout.flush()?;
         Ok(())
     }
 
