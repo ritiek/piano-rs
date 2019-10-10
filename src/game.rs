@@ -2,7 +2,6 @@ pub mod screen;
 pub mod notes;
 pub mod notes_file;
 
-use rustbox::{Color, Key};
 use std::time::Duration;
 use std::path::PathBuf;
 pub use notes::Note;
@@ -10,7 +9,7 @@ pub use notes::Player;
 pub use notes_file::{NoteReader, FileNote, NoteRecorder};
 use screen::pianokeys;
 use serde_derive::{Serialize, Deserialize};
-use crossterm::{KeyEvent, Result};
+use crossterm::{KeyEvent, Color, Result};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum GameEvent {
@@ -72,54 +71,49 @@ impl PianoKeyboard {
     }
 
     pub fn process_key(&mut self, key: KeyEvent) -> Option<GameEvent> {
-        println!("{:?}", key);
-        None
+        let note = match key {
+            KeyEvent::Right => {
+                if self.sequence < 6 {
+                    self.sequence += 1;
+                }
+                None
+            }
+            KeyEvent::Left => {
+                if self.sequence > 0 {
+                    self.sequence -= 1;
+                }
+                None
+            }
+            KeyEvent::Up => {
+                // The note sound files are maximum 8s in length
+                if self.sound_duration < Duration::from_millis(8000) {
+                    self.sound_duration += Duration::from_millis(50);
+                }
+                None
+            }
+            KeyEvent::Down => {
+                if self.sound_duration > Duration::new(0, 0) {
+                    self.sound_duration -= Duration::from_millis(50);
+                }
+                None
+            }
+            KeyEvent::Char('+') => {
+                self.volume += 0.1;
+                None
+            }
+            KeyEvent::Char('-') => {
+                self.volume -= 0.1;
+                None
+            }
+            KeyEvent::Esc => {
+                Some(GameEvent::Quit)
+            }
+            _ => notes::key_to_base_note(key, self.sequence)
+                .and_then(|note| Note::from(&note, self.color, self.sound_duration))
+                .map(GameEvent::Note),
+        };
+        note
     }
-
-    /* pub fn process_key(&mut self, key: KeyEvent) -> Option<GameEvent> { */
-    /*     let note = match key { */
-    /*         Key::Right => { */
-    /*             if self.sequence < 6 { */
-    /*                 self.sequence += 1; */
-    /*             } */
-    /*             None */
-    /*         } */
-    /*         Key::Left => { */
-    /*             if self.sequence > 0 { */
-    /*                 self.sequence -= 1; */
-    /*             } */
-    /*             None */
-    /*         } */
-    /*         Key::Up => { */
-    /*             // The note sound files are maximum 8s in length */
-    /*             if self.sound_duration < Duration::from_millis(8000) { */
-    /*                 self.sound_duration += Duration::from_millis(50); */
-    /*             } */
-    /*             None */
-    /*         } */
-    /*         Key::Down => { */
-    /*             if self.sound_duration > Duration::new(0, 0) { */
-    /*                 self.sound_duration -= Duration::from_millis(50); */
-    /*             } */
-    /*             None */
-    /*         } */
-    /*         Key::Char('+') => { */
-    /*             self.volume += 0.1; */
-    /*             None */
-    /*         } */
-    /*         Key::Char('-') => { */
-    /*             self.volume -= 0.1; */
-    /*             None */
-    /*         } */
-    /*         Key::Esc => { */
-    /*             Some(GameEvent::Quit) */
-    /*         } */
-    /*         _ => notes::key_to_base_note(key, self.sequence) */
-    /*             .and_then(|note| Note::from(&note, self.color, self.sound_duration)) */
-    /*             .map(GameEvent::Note), */
-    /*     }; */
-    /*     note */
-    /* } */
 
 }
 
@@ -128,7 +122,7 @@ mod test {
     use super::{
         PianoKeyboard,
         Color,
-        Key,
+        KeyEvent,
         Player,
         Duration,
         GameEvent,
@@ -186,7 +180,7 @@ mod test {
             Color::Blue,
         );
 
-        let event = keyboard.process_key(Key::Char('+'));
+        let event = keyboard.process_key(KeyEvent::Char('+'));
         assert!(event.is_none());
         assert_eq!(keyboard.volume, 0.5);
     }
@@ -201,7 +195,7 @@ mod test {
             Color::Blue,
         );
 
-        let event = keyboard.process_key(Key::Char('-'));
+        let event = keyboard.process_key(KeyEvent::Char('-'));
         assert!(event.is_none());
         assert_eq!(keyboard.volume, 0.3);
     }
@@ -216,7 +210,7 @@ mod test {
             Color::Blue,
         );
 
-        let event = keyboard.process_key(Key::Right);
+        let event = keyboard.process_key(KeyEvent::Right);
         assert!(event.is_none());
         assert_eq!(keyboard.sequence, 3);
     }
@@ -231,7 +225,7 @@ mod test {
             Color::Blue,
         );
 
-        let event = keyboard.process_key(Key::Left);
+        let event = keyboard.process_key(KeyEvent::Left);
         assert!(event.is_none());
         assert_eq!(keyboard.sequence, 1);
     }
@@ -246,7 +240,7 @@ mod test {
             Color::Blue,
         );
 
-        let event = keyboard.process_key(Key::Up);
+        let event = keyboard.process_key(KeyEvent::Up);
         assert!(event.is_none());
         assert_eq!(keyboard.sound_duration, Duration::from_millis(7050));
     }
@@ -261,7 +255,7 @@ mod test {
             Color::Blue,
         );
 
-        let event = keyboard.process_key(Key::Down);
+        let event = keyboard.process_key(KeyEvent::Down);
         assert!(event.is_none());
         assert_eq!(keyboard.sound_duration, Duration::from_millis(6950));
     }
@@ -276,7 +270,7 @@ mod test {
             Color::Blue,
         );
 
-        let event = keyboard.process_key(Key::Esc);
+        let event = keyboard.process_key(KeyEvent::Esc);
         match event {
             Some(GameEvent::Quit) => assert!(true),
             _ => panic!("This key should have returned a Quit event!"),
@@ -293,7 +287,7 @@ mod test {
             Color::Blue,
         );
 
-        let event = keyboard.process_key(Key::Char('a'));
+        let event = keyboard.process_key(KeyEvent::Char('a'));
 
         let expected_note = Note {
             sound: "gs1".to_string(),

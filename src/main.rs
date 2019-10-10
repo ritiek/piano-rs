@@ -1,5 +1,3 @@
-use rustbox::Color;
-
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -11,6 +9,7 @@ use crossterm::{
     execute,
     Crossterm,
     RawScreen,
+    Color,
     Clear,
     ClearType,
     InputEvent,

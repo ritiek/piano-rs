@@ -3,8 +3,8 @@ pub mod play;
 use std::num::ParseIntError;
 use std::convert::Infallible;
 use serde_derive::{Serialize, Deserialize};
-use rustbox::{Key, Color};
 use std::time::Duration;
+use crossterm::{KeyEvent, Color};
 pub use play::Player;
 
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
@@ -106,7 +106,7 @@ impl Note {
     }
 }
 
-pub fn key_to_base_note(mut key: Key, sequence: i8) -> Option<String> {
+pub fn key_to_base_note(mut key: KeyEvent, sequence: i8) -> Option<String> {
     let mut offset: i8 = 0;
 
     let keys = ['z', 's', 'x', 'c', 'f', 'v', 'g', 'b', 'n',
@@ -132,22 +132,22 @@ pub fn key_to_base_note(mut key: Key, sequence: i8) -> Option<String> {
 
 
     // Handle terminal control characters
-    if key == Key::Enter {
+    if key == KeyEvent::Enter {
         // Ctrl+m sends Enter in terminal
-        key = Key::Ctrl('m');
-    } else if key == Key::Tab {
+        key = KeyEvent::Ctrl('m');
+    } else if key == KeyEvent::Tab {
         // Ctrl+i sends Tab in terminal
-        key = Key::Ctrl('i');
+        key = KeyEvent::Ctrl('i');
     }
 
     // Translate Ctrl+<character> to <character>
-    if let Key::Ctrl(c) = key {
-        key = Key::Char(c);
+    if let KeyEvent::Ctrl(c) = key {
+        key = KeyEvent::Char(c);
         offset -= 1;
     }
 
     // Increment `offset` if key was shift prefixed (Shift+<character>)
-    let note: Option<String> = if let Key::Char(mut c) = key {
+    let note: Option<String> = if let KeyEvent::Char(mut c) = key {
         if c.is_uppercase() {
             c = c.to_ascii_lowercase();
             offset += 1;
@@ -242,7 +242,7 @@ mod test {
 
     #[test]
     fn key_to_base_note() {
-        let base_note = super::key_to_base_note(super::Key::Char('a'), 2);
+        let base_note = super::key_to_base_note(super::KeyEvent::Char('a'), 2);
         match base_note {
             Some(v) => assert_eq!(v, "gs1"),
             None => panic!("The key should have been parsable!"),
@@ -251,7 +251,7 @@ mod test {
 
     #[test]
     fn key_to_base_note_none() {
-        let base_note = super::key_to_base_note(super::Key::Char('~'), 2);
+        let base_note = super::key_to_base_note(super::KeyEvent::Char('~'), 2);
         assert!(base_note.is_none());
     }
 }

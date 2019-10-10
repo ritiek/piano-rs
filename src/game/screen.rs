@@ -2,13 +2,13 @@ use std::{thread, time};
 
 use crossterm::{
     queue,
+    Color,
     Colorize,
     Goto,
     PrintStyledFont,
 };
 
 use std::io::{stdout, Write};
-use rustbox::Color;
 
 /*
 █▒
