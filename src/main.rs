@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use crossterm::{
     input,
     execute,
-    Crossterm,
     RawScreen,
     Clear,
     ClearType,
@@ -114,7 +113,6 @@ fn main() -> Result<()> {
     let event_sender = Arc::new(Mutex::new(Sender::new(arguments.sender_address, arguments.host_address)?));
     let event_sender_clone = event_sender.clone();
 
-    let crossterm = Crossterm::new();
     execute!(stdout(), Clear(ClearType::All)).unwrap();
 
     let _raw = RawScreen::into_raw_mode();
@@ -161,10 +159,7 @@ fn main() -> Result<()> {
     }
 
     let input = input();
-    /* input.enable_mouse_mode()?; */
     let mut sync_stdin = input.read_sync();
-
-    /* crossterm.cursor().hide().unwrap(); */
     game_loop(&mut sync_stdin, &keyboard, &event_sender);
 
     Ok(())
