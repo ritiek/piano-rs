@@ -83,6 +83,8 @@ OPTIONS:
 - You can also record your piano session by passing the command-line argument `-r <path/to/save/notes.yml>`
   and play them later on with `-p <path/to/save/notes.yml>`.
 
+Press the <kbd>Esc</kbd> key to exit the game.
+
 **NOTE:** If you get no sound when you press keys, [try running it in a directory containing the assets directory](https://github.com/ritiek/piano-rs/issues/6#issuecomment-354971861). The note sound files are loaded at runtime and piano-rs will fail to load them if it cannot find the assets
 directory in your current working directory.
 
