@@ -16,8 +16,9 @@ serde_derive = "1.0"
 serde = "1.0"
 clap = "2.33"
 rodio = "0.9"
-rustbox = { version = "0.11", path = "vendor/rustbox" }
 yaml-rust = "0.4"
+crossterm = "0.11.1"
+crossterm_style = { version = "0.5.1", features = ["serde"] }
 
 [[bin]]
 name = "piano-rs"

@@ -1,11 +1,19 @@
-use rustbox::{Color, RustBox};
-use std::default::Default;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use std::net::SocketAddr;
-use std::io::Result;
+use std::io::{stdout, Write, Result};
 use std::path::PathBuf;
+use crossterm::{
+    input,
+    execute,
+    RawScreen,
+    Clear,
+    ClearType,
+    InputEvent,
+    SyncReader,
+};
+use crossterm_style::Color;
 
 use piano_rs::arguments::Options;
 use piano_rs::game::{
@@ -22,7 +30,6 @@ use piano_rs::network::{
 
 fn handle_network_receive_event(
     keyboard: &Arc<Mutex<PianoKeyboard>>,
-    rustbox: &Arc<Mutex<RustBox>>,
     event_sender: &Arc<Mutex<Sender>>,
     event_receiver: &Receiver,
 ) {
@@ -55,28 +62,29 @@ fn handle_network_receive_event(
             });
         }
         NetworkEvent::Note(note) => {
-            keyboard.lock().unwrap().play_note(note, &rustbox);
+            keyboard.lock().unwrap().play_note(note);
         }
        _ => { },
     }
 }
 
-fn game_loop(rustbox: &Arc<Mutex<RustBox>>, keyboard: &Arc<Mutex<PianoKeyboard>>, event_sender: &Arc<Mutex<Sender>>) {
-    let duration = Duration::from_nanos(1000);
+fn game_loop(stdin: &mut SyncReader, keyboard: &Arc<Mutex<PianoKeyboard>>, event_sender: &Arc<Mutex<Sender>>) {
+    /* let duration = Duration::from_nanos(1000); */
+
     loop {
-        let event = rustbox.lock().unwrap().peek_event(duration, false);
-        match event {
-            Ok(rustbox::Event::KeyEvent(key)) => {
-                match keyboard.lock().unwrap().process_key(key) {
-                    Some(GameEvent::Note(note)) => {
-                        event_sender.lock().unwrap().tick(note).unwrap();
-                    }
-                    Some(GameEvent::Quit) => break,
-                    None => { },
-                };
+        if let Some(event) = stdin.next() {
+            match event {
+                InputEvent::Keyboard(key) => {
+                    match keyboard.lock().unwrap().process_key(key) {
+                        Some(GameEvent::Note(note)) => {
+                            event_sender.lock().unwrap().tick(note).unwrap();
+                        }
+                        Some(GameEvent::Quit) => break,
+                        None => { },
+                    };
+                },
+                _ => { },
             }
-            Err(e) => panic!("{}", e),
-            _ => { },
         }
     }
 }
@@ -105,9 +113,9 @@ fn main() -> Result<()> {
     let event_sender = Arc::new(Mutex::new(Sender::new(arguments.sender_address, arguments.host_address)?));
     let event_sender_clone = event_sender.clone();
 
-    let rustbox = Arc::new(Mutex::new(
-        RustBox::init(Default::default()).unwrap()
-    ));
+    execute!(stdout(), Clear(ClearType::All)).unwrap();
+
+    let _raw = RawScreen::into_raw_mode();
 
     let keyboard = Arc::new(Mutex::new(PianoKeyboard::new(
         arguments.sequence,
@@ -117,16 +125,14 @@ fn main() -> Result<()> {
         Color::Blue,
     )));
 
-    keyboard.lock().unwrap().draw(&rustbox);
+    keyboard.lock().unwrap().draw().unwrap();
 
-    let clonebox = rustbox.clone();
     let cloneboard = keyboard.clone();
 
     thread::spawn(move || {
         loop {
             handle_network_receive_event(
                 &cloneboard,
-                &clonebox,
                 &event_sender_clone,
                 &event_receiver
             );
@@ -152,7 +158,9 @@ fn main() -> Result<()> {
         ));
     }
 
-    game_loop(&rustbox, &keyboard, &event_sender);
+    let input = input();
+    let mut sync_stdin = input.read_sync();
+    game_loop(&mut sync_stdin, &keyboard, &event_sender);
 
     Ok(())
 }
