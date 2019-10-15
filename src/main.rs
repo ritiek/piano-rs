@@ -5,6 +5,7 @@ use std::net::SocketAddr;
 use std::io::{stdout, Write, Result};
 use std::path::PathBuf;
 use crossterm::{
+    cursor,
     input,
     execute,
     RawScreen,
@@ -160,6 +161,10 @@ fn main() -> Result<()> {
 
     let input = input();
     let mut sync_stdin = input.read_sync();
+
+    let cursor = cursor();
+    cursor.hide();
+
     game_loop(&mut sync_stdin, &keyboard, &event_sender);
 
     Ok(())
