@@ -74,17 +74,14 @@ fn game_loop(stdin: &mut SyncReader, keyboard: &Arc<Mutex<PianoKeyboard>>, event
 
     loop {
         if let Some(event) = stdin.next() {
-            match event {
-                InputEvent::Keyboard(key) => {
-                    match keyboard.lock().unwrap().process_key(key) {
-                        Some(GameEvent::Note(note)) => {
-                            event_sender.lock().unwrap().tick(note).unwrap();
-                        }
-                        Some(GameEvent::Quit) => break,
-                        None => { },
-                    };
-                },
-                _ => { },
+            if let InputEvent::Keyboard(key) = event {
+                match keyboard.lock().unwrap().process_key(key) {
+                    Some(GameEvent::Note(note)) => {
+                        event_sender.lock().unwrap().tick(note).unwrap();
+                    }
+                    Some(GameEvent::Quit) => break,
+                    None => { },
+                }
             }
         }
     }
@@ -163,7 +160,7 @@ fn main() -> Result<()> {
     let mut sync_stdin = input.read_sync();
 
     let cursor = cursor();
-    cursor.hide();
+    cursor.hide().unwrap_or_default();
 
     game_loop(&mut sync_stdin, &keyboard, &event_sender);
 

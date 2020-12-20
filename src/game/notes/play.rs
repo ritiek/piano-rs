@@ -16,7 +16,7 @@ impl Player {
         for base in &["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"] {
             for frequency in -1..8_i8 {
                 Self::read_note(*base, frequency)
-                    .and_then(|sample| {
+                    .map(|sample| {
                         samples.insert(format!("{}{}", base, frequency), sample);
                         Some(())
                     });
@@ -62,6 +62,13 @@ impl Player {
             }).ok()
     }
 }
+
+impl Default for Player {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 
 #[cfg(test)]
 mod test {

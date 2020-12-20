@@ -35,11 +35,8 @@ impl NoteReader {
     pub fn parse_notes(&self) -> Vec<FileNote> {
         let mut counter = 1;
         let mut file_base_notes: Vec<FileNote> = Vec::new();
-        loop {
-            match self.parse_yaml_entry(counter) {
-                Ok(v) => file_base_notes.push(v),
-                Err(_) => break,
-            }
+        while let Ok(v) = self.parse_yaml_entry(counter) {
+            file_base_notes.push(v);
             counter += 1;
         }
         file_base_notes
@@ -54,9 +51,9 @@ impl NoteReader {
                 let base_note = x[1].as_str().unwrap();
                 let duration = Duration::from_millis(x[2].as_i64().unwrap() as u64);
                 Ok(FileNote {
-                    delay: delay,
+                    delay,
                     base_note: base_note.to_string(),
-                    duration: duration,
+                    duration,
                 })
             },
             _ => Err(String::from("Could not parse note")),
@@ -128,3 +125,10 @@ impl NoteRecorder {
         self.previous_note_time = time;
     }
 }
+
+impl Default for NoteRecorder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+

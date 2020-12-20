@@ -13,8 +13,8 @@ impl Sender {
     pub fn new(addr: SocketAddr, host_addr: SocketAddr) -> Result<Sender> {
         let socket = UdpSocket::bind(&addr)?;
         Ok(Sender {
-            socket: socket,
-            host_addr: host_addr,
+            socket,
+            host_addr,
             peer_addrs: Vec::new(),
         })
     }

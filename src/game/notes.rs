@@ -41,7 +41,7 @@ impl Note {
         for start_index in 1..note.len() {
             frequency = note[start_index..].parse();
             base_sound = note[..start_index].parse();
-            if let Ok(_) = frequency {
+            if frequency.is_ok() {
                 break;
             }
         }
@@ -76,11 +76,11 @@ impl Note {
             Some(v) => Ok(Note {
                 sound: format!("{}{}", base_sound, frequency),
                 base: base_sounds[v].to_string(),
-                frequency: frequency,
+                frequency,
                 position: init_poses[v] + 21 * ((frequency - factors[v]) as i16),
                 white: whites[v],
-                color: color,
-                duration: duration,
+                color,
+                duration,
             }),
             None => Err(String::from("We're Fucked.")),
         }

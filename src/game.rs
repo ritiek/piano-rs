@@ -33,12 +33,12 @@ impl PianoKeyboard {
         let player = Player::new();
 
         PianoKeyboard {
-            sequence: sequence,
-            volume: volume,
-            sound_duration: sound_duration,
-            mark_duration: mark_duration,
-            color: color,
-            player: player,
+            sequence,
+            volume,
+            sound_duration,
+            mark_duration,
+            color,
+            player,
             recorder: NoteRecorder::new(),
         }
     }
@@ -62,7 +62,7 @@ impl PianoKeyboard {
             self.mark_duration,
         );
 
-        if let Some(_) = &self.recorder.record_file {
+        if self.recorder.record_file.is_some(){
             self.recorder.write_note(note);
         }
     }
@@ -72,7 +72,7 @@ impl PianoKeyboard {
     }
 
     pub fn process_key(&mut self, key: KeyEvent) -> Option<GameEvent> {
-        let note = match key {
+        match key {
             KeyEvent::Right => {
                 if self.sequence < 6 {
                     self.sequence += 1;
@@ -112,10 +112,8 @@ impl PianoKeyboard {
             _ => notes::key_to_base_note(key, self.sequence)
                 .and_then(|note| Note::from(&note, self.color, self.sound_duration))
                 .map(GameEvent::Note),
-        };
-        note
+        }
     }
-
 }
 
 #[cfg(test)]

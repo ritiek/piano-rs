@@ -12,7 +12,7 @@ impl Receiver {
     pub fn new(addr: SocketAddr) -> Result<Receiver> {
         let socket = UdpSocket::bind(&addr)?;
         Ok(Receiver {
-            socket: socket,
+            socket,
         })
     }
 
@@ -24,9 +24,9 @@ impl Receiver {
 
         let event: types::NetworkEvent = bincode::deserialize(&buf).unwrap();
         Ok(types::NetworkData {
-            amt: amt,
-            src: src,
-            event: event,
+            amt,
+            src,
+            event,
         })
     }
 
@@ -38,9 +38,9 @@ impl Receiver {
 
         let event: types::NetworkEvent = bincode::deserialize(&buf).unwrap();
         Ok(types::NetworkData {
-            amt: amt,
-            src: src,
-            event: event,
+            amt,
+            src,
+            event,
         })
     }
 }

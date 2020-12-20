@@ -19,12 +19,11 @@ impl Options {
     pub fn read() -> Options {
         let arguments = Self::get_arguments();
         let receiver_address = value_t!(arguments.value_of("receiver_address"), SocketAddr)
-            .unwrap_or("0.0.0.0:9999".parse().unwrap());
-        let default_host_address = receiver_address.clone();
+            .unwrap_or_else(|_| "0.0.0.0:9999".parse().unwrap());
 
         let parsed_arguments = Options {
             host_address     : value_t!(arguments.value_of("host_address"), SocketAddr)
-                                .unwrap_or(default_host_address),
+                                .unwrap_or(receiver_address),
             volume           : value_t!(arguments.value_of("volume"), f32)
                                 .unwrap_or(1.0),
             record_file      : value_t!(arguments.value_of("record_file"), String)
@@ -39,9 +38,9 @@ impl Options {
                                 .unwrap_or(0),
             mark_duration    : value_t!(arguments.value_of("mark_duration"), u64)
                                 .unwrap_or(500),
-            receiver_address : receiver_address,
+            receiver_address,
             sender_address   : value_t!(arguments.value_of("sender_address"), SocketAddr)
-                                .unwrap_or("0.0.0.0:0".parse().unwrap()),
+                                .unwrap_or_else(|_| "0.0.0.0:0".parse().unwrap()),
         };
 
         parsed_arguments
