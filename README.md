@@ -7,6 +7,8 @@ A multiplayer piano using UDP sockets that can be played using computer keyboard
 
 ## Screenshots
 
+[Video clip](https://peertube.social/videos/watch/cb98f9b5-5c5b-417b-bde4-94f17533910c)
+
 <img src="https://i.imgur.com/DOx0wWf.png" width="900">
 
 ## Compiling
