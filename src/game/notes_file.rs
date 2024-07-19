@@ -15,7 +15,6 @@ pub struct FileNote {
 
 #[derive(Debug)]
 pub struct NoteReader {
-    play_file: File,
     yaml: Vec<Yaml>,
 }
 
@@ -27,7 +26,6 @@ impl NoteReader {
         let yaml_content = YamlLoader::load_from_str(&content).unwrap();
 
         NoteReader {
-            play_file: file,
             yaml: yaml_content,
         }
     }
