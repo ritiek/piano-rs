@@ -19,6 +19,7 @@ rodio = "0.9"
 yaml-rust = "0.4"
 crossterm = "0.11.1"
 crossterm_style = { version = "0.5.1", features = ["serde"] }
+home = "0.5.9"
 
 [[bin]]
 name = "piano-rs"

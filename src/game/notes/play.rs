@@ -1,6 +1,7 @@
 use std::io::{BufReader, Read, Cursor};
 use std::{thread, time};
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 #[derive(Clone)]
 pub struct Player {
@@ -53,13 +54,28 @@ impl Player {
     }
 
     fn read_note(base: &str, frequency: i8) -> Option<Vec<u8>> {
-        let file_path = format!("assets/{0}{1}.ogg", base, frequency);
-        std::fs::File::open(file_path)
-            .map(|mut file| {
-                let mut data = Vec::new();
-                file.read_to_end(&mut data).unwrap();
-                data
-            }).ok()
+        let note_name = format!("{0}{1}.ogg", base, frequency);
+        let possible_file_paths_by_preference = [
+            PathBuf::from("assets/"),
+            home::home_dir().unwrap().join(".local/share/piano-rs/assets/"),
+            PathBuf::from("/usr/local/share/piano-rs/assets/"),
+            PathBuf::from("/usr/share/piano-rs/assets/"),
+        ];
+        for directory in possible_file_paths_by_preference {
+            let possible_file_path = directory.join(&note_name);
+            if !possible_file_path.exists() {
+                continue;
+            }
+            let file_path = possible_file_path;
+            let content = std::fs::File::open(file_path)
+                .map(|mut file| {
+                    let mut data = Vec::new();
+                    file.read_to_end(&mut data).unwrap();
+                    data
+                }).ok();
+            return content;
+        }
+        None
     }
 }
 
