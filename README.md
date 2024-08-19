@@ -21,7 +21,6 @@ You can then compile piano-rs with:
 ```
 $ git clone https://github.com/ritiek/piano-rs
 $ cd piano-rs
-# (If you're on NixOS, run `nix-shell` here)
 $ cargo build --release
 ```
 
