@@ -1,3 +1,4 @@
+# { pkgs ? import <nixpkgs> { } }:
 let
   pkgs = import (builtins.fetchTarball {
     # Pinned to `master` on 20th July, 2024.
