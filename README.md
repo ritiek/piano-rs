@@ -104,9 +104,6 @@ OPTIONS:
 
 Press the <kbd>Esc</kbd> key to exit the game.
 
-**NOTE:** If you get no sound when you press keys, [try running it in a directory containing the assets directory](https://github.com/ritiek/piano-rs/issues/6#issuecomment-354971861). The note sound files are loaded at runtime and piano-rs will fail to load them if it cannot find the assets
-directory in your current working directory.
-
 ## Multiplayer
 
 piano-rs is multiplayer! It can also be enjoyed with friends by sharing the same piano session. Here's how to setup:
