@@ -27,6 +27,12 @@ $ cd piano-rs
 $ nix develop
 ```
 
+You can also build and execute the game using:
+```
+$ nix build
+$ nix run
+```
+
 ### Other Linux based
 
 You'll need to have Rust compiler and its package manager, Cargo installed to compile piano-rs.
@@ -60,7 +66,7 @@ $ cargo run --release
 
 You can also call the binary directly located in `./target/release/piano-rs`.
 
-Additional options to the compiled binary can be passed with cargo such as:
+Additional options to the compiled binary can be passed with cargo or nix using the `--` delimiter:
 
 ```
 $ cargo run --release -- --help
