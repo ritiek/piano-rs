@@ -1,4 +1,6 @@
 {
+  description = "A multiplayer piano using UDP sockets that can be played using computer keyboard, in the terminal.";
+
   inputs = {
     fenix = {
       url = "github:nix-community/fenix";
