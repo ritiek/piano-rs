@@ -1,8 +1,10 @@
 use clap::{Arg, App, ArgMatches};
 use clap::value_t;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 
 pub struct Options {
+    pub assets: Option<PathBuf>,
     pub host_address: SocketAddr,
     pub volume: f32,
     pub record_file: Option<String>,
@@ -22,6 +24,8 @@ impl Options {
             .unwrap_or_else(|_| "0.0.0.0:9999".parse().unwrap());
 
         let parsed_arguments = Options {
+            assets           : value_t!(arguments.value_of("assets"), PathBuf)
+                                .ok(),
             host_address     : value_t!(arguments.value_of("host_address"), SocketAddr)
                                 .unwrap_or(receiver_address),
             volume           : value_t!(arguments.value_of("volume"), f32)
@@ -51,6 +55,14 @@ impl Options {
             .version("0.2.0")
             .author("Ritiek Malhotra <ritiekmalhotra123@gmail.com>")
             .about("Play piano in the terminal using PC (computer) keyboard.")
+
+            .arg(Arg::with_name("assets")
+                .short("a")
+                .long("assets")
+                .env("ASSETS")
+                .value_name("ASSETS")
+                .takes_value(true)
+                .help("Path to assets directory (Default: will autolocate)"))
 
             .arg(Arg::with_name("host_address")
                 .long("host-address")

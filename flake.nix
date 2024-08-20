@@ -13,21 +13,22 @@
       let
         toolchain = fenix.packages.${system}.minimal.toolchain;
         pkgs = import nixpkgs { inherit system; };
-        manifest = (pkgs.lib.importTOML ./Cargo.toml).package;
+        manifest = (pkgs.lib.importTOML ./Cargo.toml);
       in {
 
         packages.default = (pkgs.makeRustPlatform {
           cargo = toolchain;
           rustc = toolchain;
         }).buildRustPackage rec {
-          pname = manifest.name;
-          version = manifest.version;
+          pname = manifest.package.name;
+          version = manifest.package.version;
           src = pkgs.lib.cleanSource ./.;
 
           cargoLock.lockFile = ./Cargo.lock;
           cargoLock.allowBuiltinFetchGit = true;
           buildType = "release";
           nativeBuildInputs = with pkgs; [
+            makeWrapper
             pkg-config
           ];
           buildInputs = with pkgs; [
@@ -39,6 +40,10 @@
             cp target/${pkgs.stdenv.hostPlatform.rust.cargoShortTarget}/${buildType}/piano-rs $out/bin/
             mkdir -p $out/lib
             cp -r ${pkgs.alsa-lib.out}/lib/libasound* $out/lib/
+            cp -r assets $out/
+          '';
+          postInstall = ''
+            wrapProgram $out/bin/piano-rs --set ASSETS $out/assets
           '';
         };
 

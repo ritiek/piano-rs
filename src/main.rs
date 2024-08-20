@@ -118,6 +118,7 @@ fn main() -> Result<()> {
     let keyboard = Arc::new(Mutex::new(PianoKeyboard::new(
         arguments.sequence,
         arguments.volume,
+        arguments.assets,
         Duration::from_millis(arguments.note_duration),
         Duration::from_millis(arguments.mark_duration),
         Color::Blue,

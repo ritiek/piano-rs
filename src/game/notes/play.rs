@@ -11,17 +11,29 @@ pub struct Player {
 
 impl Player {
     pub fn new() -> Player {
+        Self::read_notes(None)
+    }
+
+    pub fn from(path: PathBuf) -> Player {
+        Self::read_notes(Some(path))
+    }
+
+    fn read_notes(path: Option<PathBuf>) -> Player {
         let device = rodio::default_output_device().unwrap();
         let mut samples = HashMap::new();
 
         for base in &["a", "as", "b", "c", "cs", "d", "ds", "e", "f", "fs", "g", "gs"] {
             for frequency in -1..8_i8 {
-                Self::read_note(*base, frequency)
+                Self::read_note(*base, frequency, path.clone())
                     .map(|sample| {
                         samples.insert(format!("{}{}", base, frequency), sample);
                         Some(())
                     });
             }
+        }
+
+        if samples.len() == 0 {
+            panic!("No sound assets found!")
         }
 
         Player {
@@ -53,14 +65,18 @@ impl Player {
             });
     }
 
-    fn read_note(base: &str, frequency: i8) -> Option<Vec<u8>> {
+    fn read_note(base: &str, frequency: i8, path: Option<PathBuf>) -> Option<Vec<u8>> {
         let note_name = format!("{0}{1}.ogg", base, frequency);
-        let possible_file_paths_by_preference = [
-            PathBuf::from("assets/"),
-            home::home_dir().unwrap().join(".local/share/piano-rs/assets/"),
-            PathBuf::from("/usr/local/share/piano-rs/assets/"),
-            PathBuf::from("/usr/share/piano-rs/assets/"),
-        ];
+        let possible_file_paths_by_preference = path.map_or_else(
+            || vec![
+                PathBuf::from("assets/"),
+                home::home_dir().unwrap().join(".local/share/piano-rs/assets/"),
+                PathBuf::from("/usr/local/share/piano-rs/assets/"),
+                PathBuf::from("/usr/share/piano-rs/assets/"),
+            ],
+            |p| vec![p]
+        );
+
         for directory in possible_file_paths_by_preference {
             let possible_file_path = directory.join(&note_name);
             if !possible_file_path.exists() {
@@ -115,13 +131,13 @@ mod test {
 
     #[test]
     fn read_note_some() {
-        let note = Player::read_note("a", 2);
+        let note = Player::read_note("a", 2, None);
         assert!(note.is_some());
     }
 
     #[test]
     fn read_note_none() {
-        let note = Player::read_note("z", 9);
+        let note = Player::read_note("z", 9, None);
         assert!(note.is_none());
     }
 }

@@ -29,8 +29,11 @@ pub struct PianoKeyboard {
 }
 
 impl PianoKeyboard {
-    pub fn new(sequence: i8, volume: f32, sound_duration: Duration, mark_duration: Duration, color: Color) -> PianoKeyboard {
-        let player = Player::new();
+    pub fn new(sequence: i8, volume: f32, assets: Option<PathBuf>, sound_duration: Duration, mark_duration: Duration, color: Color) -> PianoKeyboard {
+        let player = match assets {
+            Some(assets_path) => Player::from(assets_path),
+            None => Player::new(),
+        };
 
         PianoKeyboard {
             sequence,
@@ -134,6 +137,7 @@ mod test {
         let actual_keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -161,6 +165,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -174,6 +179,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -189,6 +195,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -204,6 +211,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -219,6 +227,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -234,6 +243,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -249,6 +259,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -264,6 +275,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
@@ -281,6 +293,7 @@ mod test {
         let mut keyboard = PianoKeyboard::new(
             2,
             0.4,
+            None,
             Duration::from_millis(7000),
             Duration::from_millis(500),
             Color::Blue,
