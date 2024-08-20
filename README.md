@@ -13,6 +13,22 @@ A multiplayer piano using UDP sockets that can be played using computer keyboard
 
 ## Compiling
 
+### Nix
+
+If you have flakes enabled, you can try out the game using:
+```
+$ nix run github:ritiek/piano-rs
+```
+
+And development environment can be setup through:
+```
+$ git clone https://github.com/ritiek/piano-rs
+$ cd piano-rs
+$ nix develop
+```
+
+### Other Linux based
+
 You'll need to have Rust compiler and its package manager, Cargo installed to compile piano-rs.
 If you don't have them already, head over to https://rustup.rs/ to run the installer.
 
@@ -24,7 +40,7 @@ $ cd piano-rs
 $ cargo build --release
 ```
 
-If you're using Ubuntu, you might face the following:
+You might face the following:
 
 ```
 error: failed to run custom build command for `alsa-sys v0.1.1`
