@@ -1,6 +1,6 @@
 [package]
 name = "piano-rs"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Ritiek <ritiekmalhotra123@gmail.com>"]
 edition = "2018"
 description = "Play piano in the terminal using PC (computer) keyboard"
