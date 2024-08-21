@@ -37,15 +37,15 @@
             python310
             alsa-lib
           ];
-          postBuild = ''
-            mkdir -p $out/bin
-            cp target/${pkgs.stdenv.hostPlatform.rust.cargoShortTarget}/${buildType}/piano-rs $out/bin/
-            mkdir -p $out/lib
-            cp -r ${pkgs.alsa-lib.out}/lib/libasound* $out/lib/
-            cp -r assets $out/
-          '';
           postInstall = ''
-            wrapProgram $out/bin/piano-rs --set ASSETS $out/assets
+            mkdir -p "$out"/bin
+            install -Dm755 target/"${pkgs.stdenv.hostPlatform.rust.cargoShortTarget}/${buildType}"/piano-rs "$out"/bin/
+
+            mkdir -p "$out"/lib
+            install -Dm644 ${pkgs.alsa-lib.out}/lib/libasound* "$out"/lib/
+
+            cp -r assets "$out"/
+            wrapProgram "$out"/bin/piano-rs --set ASSETS "$out"/assets
           '';
         };
 
